@@ -1,0 +1,448 @@
+/* Estilos Específicos por Perfil - Sistema Cidades Frias, Corações Quentes */
+
+/* ===== PERFIL GESTOR ===== */
+.gestor-popup .popup-title {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.gestor-popup .popup-action {
+    border-left-color: var(--primary-color);
+    background: rgba(46, 134, 171, 0.1);
+}
+
+/* Modal Gestor */
+#gestorModal .modal-header {
+    background: var(--gradient-primary);
+}
+
+.data-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.data-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(46, 134, 171, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.data-label {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.data-value {
+    color: var(--dark-color);
+    font-weight: 500;
+}
+
+.action-card {
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+}
+
+.action-card.crítica {
+    background: rgba(255, 68, 68, 0.1);
+    border-left-color: var(--danger-color);
+}
+
+.action-card.média {
+    background: rgba(255, 165, 0, 0.1);
+    border-left-color: var(--warning-color);
+}
+
+.action-card.segura {
+    background: rgba(68, 255, 68, 0.1);
+    border-left-color: var(--success-color);
+}
+
+.action-card h6 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.cost-estimate {
+    background: rgba(46, 134, 171, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.cost-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.species-recommendation {
+    background: rgba(68, 255, 68, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.species-text {
+    color: var(--dark-color);
+    font-style: italic;
+}
+
+.interpretation {
+    font-size: 0.95rem;
+}
+
+.interpretation ul {
+    margin-bottom: 0;
+}
+
+/* Sidebar Gestor */
+.sidebar-gestor .info-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.sidebar-gestor .legend-color {
+    border-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.sidebar-gestor .legend-color.critical { 
+    background-color: var(--danger-color); 
+}
+
+.sidebar-gestor .legend-color.medium { 
+    background-color: var(--warning-color); 
+}
+
+.sidebar-gestor .legend-color.safe { 
+    background-color: var(--success-color); 
+}
+
+/* ===== PERFIL VOLUNTÁRIO ===== */
+.voluntario-popup .popup-title {
+    color: var(--secondary-color);
+    border-bottom-color: var(--secondary-color);
+}
+
+.voluntario-popup .popup-action {
+    border-left-color: var(--secondary-color);
+    background: rgba(162, 59, 114, 0.1);
+}
+
+/* Modal Voluntário */
+#voluntarioModal .modal-header {
+    background: var(--gradient-volunteer);
+}
+
+.zone-info {
+    padding: 1rem 0;
+}
+
+.zone-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.zone-icon {
+    font-size: 3rem;
+    width: 80px;
+    text-align: center;
+}
+
+.zone-details h5 {
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+}
+
+.zone-region {
+    color: #6c757d;
+    margin: 0;
+}
+
+.help-status {
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.help-status.crítica {
+    background: rgba(255, 68, 68, 0.1);
+    border: 2px solid var(--danger-color);
+}
+
+.help-status.média {
+    background: rgba(255, 165, 0, 0.1);
+    border: 2px solid var(--warning-color);
+}
+
+.help-status.segura {
+    background: rgba(68, 255, 68, 0.1);
+    border: 2px solid var(--success-color);
+}
+
+.help-status h6 {
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.zone-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.help-actions {
+    background: rgba(162, 59, 114, 0.1);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--secondary-color);
+}
+
+.help-actions h6 {
+    margin-bottom: 1rem;
+    color: var(--secondary-color);
+}
+
+.help-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.help-list li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.help-list i {
+    color: var(--secondary-color);
+    width: 20px;
+}
+
+.success-message {
+    background: rgba(68, 255, 68, 0.1);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--success-color);
+    text-align: center;
+}
+
+.success-message h6 {
+    color: var(--success-color);
+    margin-bottom: 0.75rem;
+}
+
+/* Modal de Confirmação */
+#helpModal .modal-header {
+    background: var(--gradient-volunteer);
+}
+
+.contact-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.contact-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(162, 59, 114, 0.05);
+    border-radius: 8px;
+}
+
+.contact-option i {
+    font-size: 1.5rem;
+}
+
+/* Sidebar Voluntário */
+.sidebar-voluntario .info-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.help-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.help-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.help-icon {
+    font-size: 2rem;
+    width: 50px;
+    text-align: center;
+}
+
+.help-text {
+    flex: 1;
+}
+
+.help-text strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.help-text small {
+    opacity: 0.8;
+}
+
+.instructions-list {
+    padding-left: 0;
+    list-style: none;
+}
+
+.instructions-list li {
+    margin-bottom: 0.75rem;
+    padding-left: 2rem;
+    position: relative;
+}
+
+.instructions-list li i {
+    position: absolute;
+    left: 0;
+    top: 0.25rem;
+    color: rgba(255,255,255,0.8);
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.contact-item i {
+    width: 20px;
+    text-align: center;
+}
+
+/* ===== RESPONSIVIDADE ESPECÍFICA ===== */
+@media (max-width: 768px) {
+    .zone-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .zone-icon {
+        font-size: 2.5rem;
+    }
+    
+    .contact-option {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .help-list li {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .data-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .stat-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .action-card {
+        padding: 1rem;
+    }
+    
+    .zone-stats {
+        gap: 0.5rem;
+    }
+}
+
+/* ===== ANIMAÇÕES ESPECÍFICAS ===== */
+.zone-marker {
+    transition: all 0.3s ease;
+}
+
+.zone-marker:hover {
+    transform: scale(1.1);
+    filter: brightness(1.1);
+}
+
+.profile-card {
+    transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-strong);
+}
+
+.info-card {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.info-card:nth-child(2) { animation-delay: 0.1s; }
+.info-card:nth-child(3) { animation-delay: 0.2s; }
+.info-card:nth-child(4) { animation-delay: 0.3s; }
+
+/* ===== ESTADOS ESPECIAIS ===== */
+.loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.highlight-zone {
+    animation: highlight 2s ease-in-out;
+}
+
+@keyframes highlight {
+    0% { box-shadow: 0 0 0 0 rgba(46, 134, 171, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(46, 134, 171, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(46, 134, 171, 0); }
+}
+

@@ -1,0 +1,32 @@
+id,nome,latitude,longitude,temperatura,ndvi,densidade_populacional,regiao
+1,Vila Madalena,-23.5505,-46.6933,41.2,0.35,8500,Zona Oeste
+2,Pinheiros,-23.5505,-46.6933,42.8,0.28,12000,Zona Oeste
+3,Jardins,-23.5656,-46.6528,43.5,0.22,9800,Zona Sul
+4,Vila Olímpia,-23.5925,-46.6875,42.1,0.31,15000,Zona Sul
+5,Mooca,-23.5505,-46.6933,39.8,0.45,7200,Zona Leste
+6,Brás,-23.5505,-46.6933,44.2,0.15,18000,Zona Leste
+7,Sé,-23.5505,-46.6933,45.1,0.08,22000,Centro
+8,República,-23.5505,-46.6933,44.8,0.12,19000,Centro
+9,Liberdade,-23.5505,-46.6933,41.5,0.25,11000,Centro
+10,Vila Mariana,-23.5925,-46.6375,40.2,0.42,6800,Zona Sul
+11,Santo André,-23.6639,-46.5383,38.5,0.55,5200,ABC
+12,São Caetano,-23.6231,-46.5519,37.8,0.58,4800,ABC
+13,Guarulhos,-23.4538,-46.5331,39.2,0.48,8900,Grande SP
+14,Osasco,-23.5329,-46.7919,40.8,0.35,12500,Grande SP
+15,Santo Amaro,-23.6489,-46.7081,41.9,0.28,10200,Zona Sul
+16,Butantã,-23.5716,-46.7081,40.5,0.45,7800,Zona Oeste
+17,Lapa,-23.5211,-46.7081,42.3,0.22,11800,Zona Oeste
+18,Casa Verde,-23.4883,-46.6758,39.6,0.38,8500,Zona Norte
+19,Santana,-23.4883,-46.6758,40.1,0.35,9200,Zona Norte
+20,Tucuruvi,-23.4883,-46.6758,38.9,0.52,6800,Zona Norte
+21,Itaquera,-23.5405,-46.4583,39.4,0.48,7800,Zona Leste
+22,São Mateus,-23.6014,-46.4431,40.7,0.35,8900,Zona Leste
+23,Vila Formosa,-23.5405,-46.4583,39.8,0.42,7200,Zona Leste
+24,Penha,-23.5405,-46.4583,41.2,0.28,9500,Zona Leste
+25,Mooca,-23.5405,-46.4583,40.9,0.31,8800,Zona Leste
+26,Bela Vista,-23.5656,-46.6528,43.8,0.18,15000,Centro
+27,Consolação,-23.5656,-46.6528,44.1,0.15,16500,Centro
+28,Cambuci,-23.5656,-46.6528,42.5,0.25,11200,Centro
+29,Bom Retiro,-23.5405,-46.6358,43.2,0.20,12800,Centro
+30,Barra Funda,-23.5211,-46.7081,41.8,0.35,9800,Zona Oeste
+

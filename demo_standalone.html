@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ilhas de Calor - Demo Standalone</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-content {
+            padding: 2rem;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            color: white;
+            font-weight: 300;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 1rem;
+        }
+
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .info-card h5 {
+            color: white;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .custom-marker {
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .custom-marker:hover {
+            transform: scale(1.2);
+        }
+
+        .popup-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+
+        .popup-data {
+            margin-bottom: 8px;
+        }
+
+        .popup-data strong {
+            color: #34495e;
+        }
+
+        .popup-action {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .popup-action h6 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .demo-notice {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .demo-notice h6 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <div class="sidebar-content">
+                    <h2 class="text-center mb-4">
+                        🌡️ Ilhas de Calor
+                    </h2>
+                    
+                    <div class="demo-notice">
+                        <h6>📱 Demo Standalone</h6>
+                        <p>Esta é uma demonstração do sistema usando dados simulados. Para funcionalidade completa, execute o backend Python.</p>
+                    </div>
+                    
+                    <div class="info-card mb-4">
+                        <h5>Legenda</h5>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #FF4444;"></span>
+                            <span>Crítica (>35°C)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #FFA500;"></span>
+                            <span>Média (25-35°C)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background-color: #44FF44;"></span>
+                            <span>Segura (<25°C)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card mb-4">
+                        <h5>Estatísticas</h5>
+                        <div id="statistics">
+                            <div class="stat-item">
+                                <span class="stat-label">Total de Zonas:</span>
+                                <span class="stat-value">20</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Críticas:</span>
+                                <span class="stat-value" style="color: #FF4444;">3</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Médias:</span>
+                                <span class="stat-value" style="color: #FFA500;">8</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Seguras:</span>
+                                <span class="stat-value" style="color: #44FF44;">9</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Temp. Média:</span>
+                                <span class="stat-value">39.1°C</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">NDVI Médio:</span>
+                                <span class="stat-value">0.36</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h5>Detalhes da Zona</h5>
+                        <div id="zone-details">
+                            <p class="text-light">Clique em um ponto no mapa para ver detalhes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-light w-100" onclick="showDemoAlert()">
+                            📄 Gerar Relatório (Demo)
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Map Area -->
+            <div class="col-md-9 main-content">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Dados simulados das zonas (baseados no CSV)
+        const zonesData = [
+            {id: 1, nome: "Copacabana", lat: -22.9711, lng: -43.1822, temp: 42.5, ndvi: 0.15, densidade: 12000, crit: 41.0, class: "Crítica", cor: "#FF4444"},
+            {id: 2, nome: "Ipanema", lat: -22.9833, lng: -43.2167, temp: 41.8, ndvi: 0.22, densidade: 8500, crit: 39.6, class: "Crítica", cor: "#FF4444"},
+            {id: 3, nome: "Leblon", lat: -22.9833, lng: -43.2333, temp: 40.2, ndvi: 0.35, densidade: 7200, crit: 36.7, class: "Crítica", cor: "#FF4444"},
+            {id: 4, nome: "Tijuca", lat: -22.9333, lng: -43.2333, temp: 39.5, ndvi: 0.28, densidade: 9500, crit: 36.7, class: "Crítica", cor: "#FF4444"},
+            {id: 5, nome: "Maracanã", lat: -22.9167, lng: -43.2167, temp: 38.9, ndvi: 0.31, densidade: 6800, crit: 35.8, class: "Crítica", cor: "#FF4444"},
+            {id: 6, nome: "Centro", lat: -22.9067, lng: -43.1725, temp: 44.2, ndvi: 0.08, densidade: 15000, crit: 43.4, class: "Crítica", cor: "#FF4444"},
+            {id: 7, nome: "Santa Teresa", lat: -22.9167, lng: -43.1833, temp: 37.8, ndvi: 0.45, densidade: 4200, crit: 33.3, class: "Média", cor: "#FFA500"},
+            {id: 8, nome: "Lapa", lat: -22.9167, lng: -43.1833, temp: 41.1, ndvi: 0.12, densidade: 11000, crit: 39.9, class: "Média", cor: "#FFA500"},
+            {id: 9, nome: "Catete", lat: -22.9333, lng: -43.1833, temp: 39.8, ndvi: 0.25, densidade: 8900, crit: 37.3, class: "Média", cor: "#FFA500"},
+            {id: 10, nome: "Glória", lat: -22.9333, lng: -43.1833, temp: 40.5, ndvi: 0.18, densidade: 7600, crit: 38.7, class: "Média", cor: "#FFA500"},
+            {id: 11, nome: "Flamengo", lat: -22.9333, lng: -43.1833, temp: 39.2, ndvi: 0.33, densidade: 8100, crit: 35.9, class: "Média", cor: "#FFA500"},
+            {id: 12, nome: "Botafogo", lat: -22.9500, lng: -43.1833, temp: 38.7, ndvi: 0.29, densidade: 9300, crit: 35.8, class: "Média", cor: "#FFA500"},
+            {id: 13, nome: "Urca", lat: -22.9500, lng: -43.1667, temp: 37.5, ndvi: 0.52, densidade: 3800, crit: 32.3, class: "Média", cor: "#FFA500"},
+            {id: 14, nome: "Jardim Botânico", lat: -22.9667, lng: -43.2167, temp: 36.8, ndvi: 0.58, densidade: 2900, crit: 31.0, class: "Média", cor: "#FFA500"},
+            {id: 15, nome: "Gávea", lat: -22.9833, lng: -43.2333, temp: 36.2, ndvi: 0.62, densidade: 3400, crit: 30.0, class: "Segura", cor: "#44FF44"},
+            {id: 16, nome: "Vidigal", lat: -22.9833, lng: -43.2333, temp: 37.1, ndvi: 0.48, densidade: 4100, crit: 32.3, class: "Segura", cor: "#44FF44"},
+            {id: 17, nome: "Rocinha", lat: -22.9833, lng: -43.2333, temp: 43.8, ndvi: 0.09, densidade: 18000, crit: 42.9, class: "Crítica", cor: "#FF4444"},
+            {id: 18, nome: "São Conrado", lat: -22.9833, lng: -43.2333, temp: 38.4, ndvi: 0.41, densidade: 5200, crit: 34.3, class: "Segura", cor: "#44FF44"},
+            {id: 19, nome: "Barra da Tijuca", lat: -22.9833, lng: -43.3667, temp: 35.9, ndvi: 0.68, densidade: 2800, crit: 29.1, class: "Segura", cor: "#44FF44"},
+            {id: 20, nome: "Recreio dos Bandeirantes", lat: -22.9833, lng: -43.4167, temp: 34.5, ndvi: 0.72, densidade: 2100, crit: 27.3, class: "Segura", cor: "#44FF44"}
+        ];
+
+        let map;
+        let markers = [];
+
+        // Initialize the map
+        function initMap() {
+            map = L.map('map').setView([-22.9068, -43.1729], 11);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+            
+            addMarkersToMap();
+        }
+
+        function addMarkersToMap() {
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            
+            zonesData.forEach(zone => {
+                const marker = L.circleMarker([zone.lat, zone.lng], {
+                    radius: 12,
+                    fillColor: zone.cor,
+                    color: 'white',
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.8,
+                    className: 'custom-marker'
+                }).addTo(map);
+                
+                const popupContent = createPopupContent(zone);
+                marker.bindPopup(popupContent);
+                
+                marker.on('click', function() {
+                    showZoneDetails(zone);
+                });
+                
+                marker.on('mouseover', function() {
+                    this.setStyle({radius: 15, weight: 4});
+                });
+                
+                marker.on('mouseout', function() {
+                    this.setStyle({radius: 12, weight: 3});
+                });
+                
+                markers.push(marker);
+            });
+        }
+
+        function createPopupContent(zone) {
+            return `
+                <div class="popup-content">
+                    <div class="popup-title">${zone.nome}</div>
+                    <div class="popup-data">
+                        <strong>Temperatura:</strong> ${zone.temp}°C<br>
+                        <strong>NDVI:</strong> ${zone.ndvi}<br>
+                        <strong>Densidade:</strong> ${zone.densidade} hab/km²<br>
+                        <strong>Índice:</strong> ${zone.crit.toFixed(1)}<br>
+                        <strong>Status:</strong> <span style="color: ${zone.cor}; font-weight: bold;">${zone.class}</span>
+                    </div>
+                    <div class="popup-action">
+                        <h6>Clique para mais detalhes</h6>
+                        <small>Ver ações recomendadas e custos estimados</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showZoneDetails(zone) {
+            const detailsDiv = document.getElementById('zone-details');
+            
+            let action = "";
+            let cost = "";
+            let species = "";
+            
+            if (zone.class === 'Crítica') {
+                action = "PRIORIDADE ALTA: Plantio urgente de árvores e criação de áreas verdes";
+                cost = "R$ 50.000 - R$ 100.000";
+                species = "Ipês, Sibipirunas, Flamboyants";
+            } else if (zone.class === 'Média') {
+                action = "PRIORIDADE MÉDIA: Ampliação de áreas verdes e telhados verdes";
+                cost = "R$ 20.000 - R$ 50.000";
+                species = "Resedás, Quaresmeiras, Palmeiras";
+            } else {
+                action = "MANUTENÇÃO: Preservar áreas verdes existentes";
+                cost = "R$ 5.000 - R$ 15.000";
+                species = "Manutenção do verde existente";
+            }
+            
+            detailsDiv.innerHTML = `
+                <h6>${zone.nome}</h6>
+                <div class="stat-item">
+                    <span class="stat-label">Temperatura:</span>
+                    <span class="stat-value">${zone.temp}°C</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">NDVI:</span>
+                    <span class="stat-value">${zone.ndvi}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Criticidade:</span>
+                    <span class="stat-value">${zone.crit.toFixed(1)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Status:</span>
+                    <span class="stat-value" style="color: ${zone.cor};">${zone.class}</span>
+                </div>
+                <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                    <strong>Ação:</strong><br>
+                    <small>${action}</small><br><br>
+                    <strong>Custo:</strong> ${cost}<br>
+                    <strong>Espécies:</strong> ${species}
+                </div>
+            `;
+        }
+
+        function showDemoAlert() {
+            alert(`📄 DEMO - Relatório PDF\n\nEsta é uma demonstração. Para gerar o relatório completo:\n\n1. Instale Python 3.8+\n2. Execute: pip install -r requirements.txt\n3. Execute: python app.py\n4. Acesse: http://localhost:5000\n\nO relatório incluirá:\n• Tabela completa de bairros\n• Análise de criticidade\n• Sugestões de ações\n• Custos estimados`);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Entrar - Cidades Frias, Corações Quentes{% endblock %}
+
+{% block main_class %}container mt-5{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center">
+                <h3 class="mb-0">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Acessar Sistema
+                </h3>
+                <p class="mb-0">Escolha seu perfil para continuar</p>
+            </div>
+            
+            <div class="card-body p-4">
+                <!-- Gestor Público -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card h-100 border-0 shadow-sm profile-card" data-profile="gestor">
+                            <div class="card-body text-center p-4">
+                                <div class="profile-icon mb-3">
+                                    <i class="fas fa-user-tie fa-3x text-primary"></i>
+                                </div>
+                                <h5 class="card-title text-primary">Gestor Público</h5>
+                                <p class="card-text text-muted">
+                                    Acesso completo ao sistema com relatórios detalhados, 
+                                    análises de criticidade e ferramentas de gestão urbana.
+                                </p>
+                                <ul class="list-unstyled text-start">
+                                    <li><i class="fas fa-check text-success"></i> Mapa interativo completo</li>
+                                    <li><i class="fas fa-check text-success"></i> Relatórios PDF detalhados</li>
+                                    <li><i class="fas fa-check text-success"></i> Análises de criticidade</li>
+                                    <li><i class="fas fa-check text-success"></i> Sugestões de ações</li>
+                                </ul>
+                                <button class="btn btn-primary btn-lg w-100" onclick="loginAsProfile('gestor')">
+                                    <i class="fas fa-sign-in-alt"></i> Entrar como Gestor
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voluntário -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card h-100 border-0 shadow-sm profile-card" data-profile="voluntario">
+                            <div class="card-body text-center p-4">
+                                <div class="profile-icon mb-3">
+                                    <i class="fas fa-seedling fa-3x text-success"></i>
+                                </div>
+                                <h5 class="card-title text-success">Voluntário de Arborização</h5>
+                                <p class="card-text text-muted">
+                                    Interface simplificada para identificar zonas que precisam 
+                                    de ajuda e contribuir com a arborização da cidade.
+                                </p>
+                                <ul class="list-unstyled text-start">
+                                    <li><i class="fas fa-check text-success"></i> Mapa com zonas de calor</li>
+                                    <li><i class="fas fa-check text-success"></i> Identificação de áreas críticas</li>
+                                    <li><i class="fas fa-check text-success"></i> Botão de ajuda simplificado</li>
+                                    <li><i class="fas fa-check text-success"></i> Contato direto para ações</li>
+                                </ul>
+                                <button class="btn btn-success btn-lg w-100" onclick="loginAsProfile('voluntario')">
+                                    <i class="fas fa-hands-helping"></i> Entrar como Voluntário
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demo Info -->
+                <div class="alert alert-info mt-4">
+                    <h6><i class="fas fa-info-circle"></i> Modo Demonstração</h6>
+                    <p class="mb-0">
+                        Este é um sistema de demonstração. Escolha um perfil para explorar 
+                        as diferentes interfaces e funcionalidades disponíveis.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function loginAsProfile(profile) {
+    // Simula login - em produção seria uma requisição real
+    fetch('/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            profile: profile,
+            demo_mode: true
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/';
+        } else {
+            alert('Erro ao fazer login: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao fazer login. Tente novamente.');
+    });
+}
+
+// Adiciona efeito hover nos cards
+document.querySelectorAll('.profile-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+        this.style.transition = 'transform 0.3s ease';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+});
+</script>
+{% endblock %}
+

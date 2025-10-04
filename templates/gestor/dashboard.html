@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Gestor{% endblock %}
+
+{% block main_class %}container-fluid p-0{% endblock %}
+
+{% block content %}
+<div class="row g-0">
+    <!-- Sidebar -->
+    <div class="col-md-3 sidebar-gestor">
+        <div class="sidebar-content">
+            <div class="profile-header mb-4">
+                <h2 class="text-center mb-2">
+                    <i class="fas fa-user-tie"></i>
+                    Gestor
+                </h2>
+                <div class="profile-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    Acesso Completo
+                </div>
+            </div>
+            
+            <!-- Estatísticas -->
+            <div class="info-card mb-4">
+                <h5><i class="fas fa-chart-bar"></i> Estatísticas Gerais</h5>
+                <div id="statistics">
+                    <div class="stat-item">
+                        <span class="stat-label">Total de Zonas:</span>
+                        <span class="stat-value" id="total-zones">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Críticas:</span>
+                        <span class="stat-value critical" id="critical-zones">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Médias:</span>
+                        <span class="stat-value medium" id="medium-zones">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Seguras:</span>
+                        <span class="stat-value safe" id="safe-zones">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Temp. Média:</span>
+                        <span class="stat-value" id="avg-temperature">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">NDVI Médio:</span>
+                        <span class="stat-value" id="avg-ndvi">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Legenda -->
+            <div class="info-card mb-4">
+                <h5><i class="fas fa-map-marked-alt"></i> Legenda</h5>
+                <div class="legend-item">
+                    <span class="legend-color critical"></span>
+                    <span>Crítica (>35°C)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color medium"></span>
+                    <span>Média (25-35°C)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color safe"></span>
+                    <span>Segura (<25°C)</span>
+                </div>
+            </div>
+            
+            <!-- Ações Rápidas -->
+            <div class="info-card">
+                <h5><i class="fas fa-tools"></i> Ações Rápidas</h5>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="generateFullReport()">
+                        <i class="fas fa-file-pdf"></i> Relatório Completo
+                    </button>
+                    <button class="btn btn-outline-primary" onclick="exportData()">
+                        <i class="fas fa-download"></i> Exportar Dados
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="filterCritical()">
+                        <i class="fas fa-filter"></i> Filtrar Críticas
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Detalhes da Zona Selecionada -->
+            <div class="info-card mt-4" id="zone-details-card" style="display: none;">
+                <h5><i class="fas fa-info-circle"></i> Zona Selecionada</h5>
+                <div id="zone-details-content">
+                    <!-- Conteúdo será preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mapa Principal -->
+    <div class="col-md-9 main-content">
+        <div id="map" class="map-container"></div>
+        
+        <!-- Loading overlay -->
+        <div id="loading" class="loading-overlay">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p>Carregando dados das ilhas de calor...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalhado para Gestor -->
+<div class="modal fade" id="gestorModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="gestorModalTitle">
+                    <i class="fas fa-map-marker-alt"></i> Detalhes da Zona
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="gestorModalBody">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" onclick="generateZoneReport()">
+                    <i class="fas fa-file-pdf"></i> Relatório da Zona
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.sidebar-gestor {
+    background: linear-gradient(135deg, #2E86AB 0%, #A23B72 100%);
+    color: white;
+    min-height: 100vh;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.profile-header h2 {
+    color: white;
+    font-weight: 300;
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    padding-bottom: 1rem;
+}
+
+.profile-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.info-card {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.info-card h5 {
+    color: white;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 10px;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    display: inline-block;
+}
+
+.legend-color.critical { background-color: #FF4444; }
+.legend-color.medium { background-color: #FFA500; }
+.legend-color.safe { background-color: #44FF44; }
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.stat-value.critical { color: #FF4444; }
+.stat-value.medium { color: #FFA500; }
+.stat-value.safe { color: #44FF44; }
+
+.map-container {
+    height: 100vh;
+    width: 100%;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(248, 249, 250, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-overlay p {
+    margin-top: 1rem;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+</style>
+{% endblock %}
+

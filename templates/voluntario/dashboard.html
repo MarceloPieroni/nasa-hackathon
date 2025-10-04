@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}Mapa - Voluntário{% endblock %}
+
+{% block main_class %}container-fluid p-0{% endblock %}
+
+{% block content %}
+<div class="row g-0">
+    <!-- Sidebar Voluntário -->
+    <div class="col-md-3 sidebar-voluntario">
+        <div class="sidebar-content">
+            <div class="profile-header mb-4">
+                <h2 class="text-center mb-2">
+                    <i class="fas fa-seedling"></i>
+                    Voluntário
+                </h2>
+                <div class="profile-badge">
+                    <i class="fas fa-hands-helping"></i>
+                    Fazendo a Diferença
+                </div>
+            </div>
+            
+            <!-- Resumo Simples -->
+            <div class="info-card mb-4">
+                <h5><i class="fas fa-heart"></i> Como Você Pode Ajudar</h5>
+                <div class="help-summary">
+                    <div class="help-item">
+                        <span class="help-icon critical">🔥</span>
+                        <div class="help-text">
+                            <strong>Zonas Críticas</strong>
+                            <small>Precisam de arborização urgente</small>
+                        </div>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-icon medium">🌱</span>
+                        <div class="help-text">
+                            <strong>Zonas Médias</strong>
+                            <small>Podem melhorar com mais verde</small>
+                        </div>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-icon safe">✅</span>
+                        <div class="help-text">
+                            <strong>Zonas Seguras</strong>
+                            <small>Bem cuidadas, mas sempre podem melhorar</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estatísticas Simples -->
+            <div class="info-card mb-4">
+                <h5><i class="fas fa-chart-pie"></i> Resumo</h5>
+                <div id="volunteer-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Zonas que Precisam de Ajuda:</span>
+                        <span class="stat-value" id="zones-need-help">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Zonas Críticas:</span>
+                        <span class="stat-value critical" id="critical-count">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Sua Contribuição:</span>
+                        <span class="stat-value" id="contribution">0 ações</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Instruções -->
+            <div class="info-card mb-4">
+                <h5><i class="fas fa-info-circle"></i> Como Usar</h5>
+                <ol class="instructions-list">
+                    <li><i class="fas fa-map-marked-alt"></i> Clique nos pontos coloridos no mapa</li>
+                    <li><i class="fas fa-eye"></i> Veja se a zona precisa de ajuda</li>
+                    <li><i class="fas fa-hand-paper"></i> Clique em "Quero Ajudar Aqui"</li>
+                    <li><i class="fas fa-envelope"></i> Entre em contato conosco</li>
+                </ol>
+            </div>
+            
+            <!-- Contato -->
+            <div class="info-card">
+                <h5><i class="fas fa-phone"></i> Contato</h5>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>voluntarios@cidadesfrias.com.br</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span>(11) 99999-9999</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-globe"></i>
+                        <span>cidadesfrias.com.br</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mapa Principal -->
+    <div class="col-md-9 main-content">
+        <div id="map" class="map-container"></div>
+        
+        <!-- Loading overlay -->
+        <div id="loading" class="loading-overlay">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p>Carregando zonas que precisam de ajuda...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Simplificado para Voluntário -->
+<div class="modal fade" id="voluntarioModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="voluntarioModalTitle">
+                    <i class="fas fa-map-marker-alt"></i> Zona Selecionada
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="voluntarioModalBody">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success btn-lg" onclick="wantToHelp()">
+                    <i class="fas fa-hands-helping"></i> Quero Ajudar Aqui!
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-heart"></i> Obrigado por Querer Ajudar!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Você está interessado em ajudar a zona:</strong></p>
+                <p id="help-zone-name" class="h5 text-success"></p>
+                
+                <hr>
+                
+                <h6><i class="fas fa-envelope"></i> Entre em Contato Conosco:</h6>
+                <div class="contact-options">
+                    <div class="contact-option">
+                        <i class="fas fa-envelope text-primary"></i>
+                        <a href="mailto:voluntarios@cidadesfrias.com.br?subject=Interesse em Ajudar - [ZONA]&body=Olá! Gostaria de ajudar na arborização da zona [ZONA]. Aguardo contato." 
+                           class="btn btn-outline-primary btn-sm">
+                            Enviar E-mail
+                        </a>
+                    </div>
+                    <div class="contact-option">
+                        <i class="fas fa-phone text-success"></i>
+                        <a href="tel:+5511999999999" class="btn btn-outline-success btn-sm">
+                            Ligar Agora
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Próximos Passos:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Entraremos em contato em até 24h</li>
+                        <li>Agendaremos uma visita à zona</li>
+                        <li>Forneceremos orientações técnicas</li>
+                        <li>Forneceremos mudas e ferramentas</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                    <i class="fas fa-check"></i> Entendi!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.sidebar-voluntario {
+    background: linear-gradient(135deg, #A23B72 0%, #F18F01 100%);
+    color: white;
+    min-height: 100vh;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.profile-header h2 {
+    color: white;
+    font-weight: 300;
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+    padding-bottom: 1rem;
+}
+
+.profile-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.info-card {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.info-card h5 {
+    color: white;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.help-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.help-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.help-icon {
+    font-size: 2rem;
+    width: 50px;
+    text-align: center;
+}
+
+.help-text {
+    flex: 1;
+}
+
+.help-text strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.help-text small {
+    opacity: 0.8;
+}
+
+.instructions-list {
+    padding-left: 0;
+    list-style: none;
+}
+
+.instructions-list li {
+    margin-bottom: 0.75rem;
+    padding-left: 2rem;
+    position: relative;
+}
+
+.instructions-list li i {
+    position: absolute;
+    left: 0;
+    top: 0.25rem;
+    color: rgba(255,255,255,0.8);
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.contact-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.stat-value.critical { color: #FF4444; }
+
+.map-container {
+    height: 100vh;
+    width: 100%;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(248, 249, 250, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.loading-overlay p {
+    margin-top: 1rem;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.contact-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.contact-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.contact-option i {
+    font-size: 1.5rem;
+}
+</style>
+{% endblock %}
+
