@@ -1,100 +1,105 @@
 /**
- * App Initialization - Sistema Cidades Frias, Corações Quentes
- * Inicialização automática dos gerenciadores baseado no perfil do usuário
+ * App Initialization - Inicialização da Aplicação
+ * Sistema Cidades Frias, Corações Quentes
  */
 
+/**
+ * Detecta o perfil do usuário baseado na URL ou elementos da página
+ */
+function detectUserProfile() {
+    // Verifica se há um perfil na sessão (definido pelo servidor)
+    if (window.userProfile) {
+        return window.userProfile;
+    }
+    
+    // Detecta baseado nos elementos da página
+    if (document.querySelector('.sidebar-gestor')) {
+        return 'gestor';
+    } else if (document.querySelector('.sidebar-civil')) {
+        return 'civil';
+    }
+    
+    return null;
+}
+
+/**
+ * Inicializa os gerenciadores baseado no perfil detectado
+ */
+function initializeManagers() {
+    const profile = detectUserProfile();
+    
+    if (!profile) {
+        console.warn('⚠️ Perfil não detectado, pulando inicialização dos gerenciadores');
+        return;
+    }
+    
+    console.log(`👤 Perfil detectado: ${profile}`);
+    
+    // Define o perfil globalmente
+    window.userProfile = profile;
+    
+    // Inicializa o MapManager com o perfil correto
+    if (window.MapManager) {
+        window.MapManager.setProfile(profile);
+    }
+    
+    // Inicializa o gerenciador específico do perfil
+    switch (profile) {
+        case 'gestor':
+            if (window.GestorManager) {
+                window.GestorManager.init();
+            }
+            break;
+        case 'civil':
+            if (window.CivilManager) {
+                window.CivilManager.init();
+            }
+            break;
+        default:
+            console.warn(`⚠️ Perfil desconhecido: ${profile}`);
+    }
+}
+
+/**
+ * Inicializa a aplicação quando o DOM estiver carregado
+ */
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando aplicação...');
+    console.log('🚀 Inicializando aplicação...');
     
-    // Detecta o perfil do usuário baseado na URL ou elementos da página
-    const userProfile = detectUserProfile();
-    console.log('Perfil detectado:', userProfile);
-    
-    // Inicializa os gerenciadores baseado no perfil
-    initializeManagers(userProfile);
+    // Aguarda um pouco para garantir que todos os scripts foram carregados
+    setTimeout(() => {
+        initializeManagers();
+    }, 100);
 });
 
 /**
- * Detecta o perfil do usuário baseado nos elementos da página
+ * Funções globais para compatibilidade
  */
-function detectUserProfile() {
-    // Verifica se existe sidebar de gestor
-    if (document.querySelector('.sidebar-gestor')) {
-        return 'gestor';
-    }
-    
-    // Verifica se existe sidebar de civil
-    if (document.querySelector('.sidebar-civil')) {
-        return 'civil';
-    }
-    
-    // Verifica pelo título da página
-    const title = document.title;
-    if (title.includes('Gestor')) {
-        return 'gestor';
-    } else if (title.includes('Civil')) {
-        return 'civil';
-    }
-    
-    return 'guest';
-}
+window.loginAsProfile = function(profile) {
+    console.log('🔐 Login como:', profile);
+    // Esta função será sobrescrita pelo template de login
+};
 
-/**
- * Inicializa os gerenciadores baseado no perfil
- */
-async function initializeManagers(profile) {
-    try {
-        // Verifica se o elemento do mapa existe
-        const mapElement = document.getElementById('map');
-        if (!mapElement) {
-            console.log('Elemento do mapa não encontrado, pulando inicialização');
-            return;
-        }
-        
-        // Inicializa gerenciadores base
-        window.DataManager = new DataManager();
-        window.MapManager = new MapManager();
-        
-        // Inicializa o mapa
-        window.MapManager.initMap();
-        
-        // Inicializa gerenciador específico do perfil
-        if (profile === 'gestor') {
-            window.GestorManager = new GestorManager();
-            await window.GestorManager.init();
-        } else if (profile === 'civil') {
-            window.CivilManager = new CivilManager();
-            await window.CivilManager.init();
-        }
-        
-        console.log('Aplicação inicializada com sucesso para perfil:', profile);
-        
-    } catch (error) {
-        console.error('Erro ao inicializar aplicação:', error);
-        showErrorMessage('Erro ao carregar o sistema. Tente recarregar a página.');
+window.generateFullReport = function() {
+    if (window.GestorManager) {
+        window.GestorManager.generateFullReport();
     }
-}
+};
 
-/**
- * Mostra mensagem de erro para o usuário
- */
-function showErrorMessage(message) {
-    // Cria um toast de erro simples
-    const toast = document.createElement('div');
-    toast.className = 'alert alert-danger position-fixed';
-    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
-    toast.innerHTML = `
-        <i class="fas fa-exclamation-triangle"></i>
-        ${message}
-        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Remove automaticamente após 5 segundos
-    setTimeout(() => {
-        if (toast.parentElement) {
-            toast.remove();
-        }
-    }, 5000);
-}
+window.exportData = function() {
+    if (window.GestorManager) {
+        window.GestorManager.exportData();
+    }
+};
+
+window.filterCritical = function() {
+    if (window.GestorManager) {
+        window.GestorManager.filterCritical();
+    }
+};
+
+window.contactCivil = function() {
+    if (window.CivilManager) {
+        window.CivilManager.contactCivil();
+    }
+};

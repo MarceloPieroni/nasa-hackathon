@@ -21,50 +21,40 @@
             </div>
             
             <!-- Estatísticas -->
-            <div class="info-card mb-4">
-                <h5><i class="fas fa-chart-bar"></i> Estatísticas Gerais</h5>
-                <div id="statistics">
+            <div class="info-card">
+                <h5><i class="fas fa-chart-bar"></i> Estatísticas</h5>
+                <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-label">Total de Zonas:</span>
-                        <span class="stat-value" id="total-zones">-</span>
+                        <span class="stat-number" id="total-zones">-</span>
+                        <span class="stat-label">Zonas</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Críticas:</span>
-                        <span class="stat-value critical" id="critical-zones">-</span>
+                        <span class="stat-number" id="critical-zones">-</span>
+                        <span class="stat-label">Críticas</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-label">Médias:</span>
-                        <span class="stat-value medium" id="medium-zones">-</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Seguras:</span>
-                        <span class="stat-value safe" id="safe-zones">-</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Temp. Média:</span>
-                        <span class="stat-value" id="avg-temperature">-</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">NDVI Médio:</span>
-                        <span class="stat-value" id="avg-ndvi">-</span>
+                        <span class="stat-number" id="avg-temperature">-</span>
+                        <span class="stat-label">Temp. Média</span>
                     </div>
                 </div>
             </div>
             
             <!-- Legenda -->
-            <div class="info-card mb-4">
-                <h5><i class="fas fa-map-marked-alt"></i> Legenda</h5>
-                <div class="legend-item">
-                    <span class="legend-color critical"></span>
-                    <span>Crítica (>35°C)</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color medium"></span>
-                    <span>Média (25-35°C)</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color safe"></span>
-                    <span>Segura (<25°C)</span>
+            <div class="info-card">
+                <h5><i class="fas fa-info-circle"></i> Legenda</h5>
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="legend-color critical"></span>
+                        <span>Crítica (>35°C)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color medium"></span>
+                        <span>Média (25-35°C)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color safe"></span>
+                        <span>Segura (<25°C)</span>
+                    </div>
                 </div>
             </div>
             
@@ -91,151 +81,42 @@
             <div class="info-card mt-4" id="zone-details-card" style="display: none;">
                 <h5><i class="fas fa-info-circle"></i> Zona Selecionada</h5>
                 <div id="zone-details-content">
-                    <!-- Conteúdo será preenchido via JavaScript -->
+                    <!-- Conteúdo será preenchido dinamicamente -->
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Mapa Principal -->
-    <div class="col-md-9 main-content">
-        <div id="map" class="map-container"></div>
-        
-        <!-- Loading overlay -->
-        <div id="loading" class="loading-overlay">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Carregando...</span>
-            </div>
-            <p>Carregando dados das ilhas de calor...</p>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Detalhado para Gestor -->
-<div class="modal fade" id="gestorModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="gestorModalTitle">
-                    <i class="fas fa-map-marker-alt"></i> Detalhes da Zona
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="gestorModalBody">
-                <!-- Conteúdo será preenchido via JavaScript -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-primary" onclick="generateZoneReport()">
-                    <i class="fas fa-file-pdf"></i> Relatório da Zona
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i> Fechar
-                </button>
+    <!-- Mapa -->
+    <div class="col-md-9">
+        <div class="map-container">
+            <div id="map"></div>
+            <div id="loading" class="loading-overlay">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p>Carregando dados das zonas...</p>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-.sidebar-gestor {
-    background: linear-gradient(135deg, #2E86AB 0%, #A23B72 100%);
-    color: white;
-    min-height: 100vh;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-}
+{% block extra_js %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-.profile-header h2 {
-    color: white;
-    font-weight: 300;
-    border-bottom: 2px solid rgba(255,255,255,0.3);
-    padding-bottom: 1rem;
-}
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-.profile-badge {
-    background: rgba(255,255,255,0.2);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
+<!-- Core JavaScript -->
+<script src="{{ url_for('static', filename='js/core/data-manager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/core/map-manager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/core/ui-manager.js') }}"></script>
 
-.info-card {
-    background: rgba(255,255,255,0.1);
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.2);
-}
+<!-- Profile-specific JavaScript -->
+<script src="{{ url_for('static', filename='js/profiles/gestor.js') }}"></script>
 
-.info-card h5 {
-    color: white;
-    margin-bottom: 1rem;
-    font-weight: 500;
-}
-
-.legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    margin-right: 10px;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    display: inline-block;
-}
-
-.legend-color.critical { background-color: #FF4444; }
-.legend-color.medium { background-color: #FFA500; }
-.legend-color.safe { background-color: #44FF44; }
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-.stat-label {
-    font-size: 0.9rem;
-}
-
-.stat-value {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.stat-value.critical { color: #FF4444; }
-.stat-value.medium { color: #FFA500; }
-.stat-value.safe { color: #44FF44; }
-
-.map-container {
-    height: 100vh;
-    width: 100%;
-}
-
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(248, 249, 250, 0.95);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.loading-overlay p {
-    margin-top: 1rem;
-    color: #6c757d;
-    font-size: 1.1rem;
-}
-</style>
+<!-- App Initialization -->
+<script src="{{ url_for('static', filename='js/app-init.js') }}"></script>
 {% endblock %}
-

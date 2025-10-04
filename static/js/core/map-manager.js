@@ -1,5 +1,5 @@
 /**
- * Map Manager - Gerenciador do Mapa Interativo
+ * Map Manager - Gerenciador do Mapa
  * Sistema Cidades Frias, Corações Quentes
  */
 
@@ -26,7 +26,7 @@ class MapManager {
         }).addTo(this.map);
         
         this.initialized = true;
-        console.log('Mapa inicializado com sucesso');
+        console.log('🗺️ Mapa inicializado com sucesso');
     }
 
     /**
@@ -34,148 +34,91 @@ class MapManager {
      */
     addZonesToMap(zonesData) {
         if (!this.map) {
-            console.error('Mapa não inicializado');
-            return;
+            this.initMap();
         }
 
-        // Remove marcadores existentes
+        // Limpa marcadores existentes
         this.clearMarkers();
 
         zonesData.forEach(zone => {
-            const marker = this.createZoneMarker(zone);
+            const marker = this.createMarker(zone);
             this.markers.push(marker);
         });
 
-        console.log(`${this.markers.length} zonas adicionadas ao mapa`);
+        console.log(`📍 ${this.markers.length} marcadores adicionados ao mapa`);
     }
 
     /**
-     * Cria um marcador para uma zona específica
+     * Cria um marcador para uma zona
      */
-    createZoneMarker(zone) {
+    createMarker(zone) {
         const marker = L.circleMarker([zone.latitude, zone.longitude], {
-            radius: this.getMarkerSize(zone),
+            color: zone.cor,
             fillColor: zone.cor,
-            color: 'white',
-            weight: 3,
-            opacity: 1,
-            fillOpacity: 0.8,
-            className: 'zone-marker'
-        }).addTo(this.map);
+            fillOpacity: 0.7,
+            radius: 8,
+            weight: 2
+        });
 
         // Adiciona popup baseado no perfil
         const popupContent = this.createPopupContent(zone);
         marker.bindPopup(popupContent);
 
-        // Adiciona eventos de clique
+        // Adiciona evento de clique
         marker.on('click', () => {
             this.onZoneClick(zone);
         });
 
-        // Efeitos hover
-        marker.on('mouseover', () => {
-            marker.setStyle({
-                radius: this.getMarkerSize(zone) + 3,
-                weight: 4
-            });
-        });
-
-        marker.on('mouseout', () => {
-            marker.setStyle({
-                radius: this.getMarkerSize(zone),
-                weight: 3
-            });
-        });
-
+        marker.addTo(this.map);
         return marker;
     }
 
     /**
-     * Determina o tamanho do marcador baseado na criticidade
-     */
-    getMarkerSize(zone) {
-        switch (zone.classificacao) {
-            case 'Crítica': return 15;
-            case 'Média': return 12;
-            case 'Segura': return 10;
-            default: return 12;
-        }
-    }
-
-    /**
-     * Cria conteúdo do popup baseado no perfil do usuário
+     * Cria conteúdo do popup baseado no perfil
      */
     createPopupContent(zone) {
-        if (this.currentProfile === 'gestor') {
-            return this.createGestorPopup(zone);
-        } else {
+        if (this.currentProfile === 'civil') {
             return this.createCivilPopup(zone);
+        } else {
+            return this.createGestorPopup(zone);
         }
     }
 
     /**
-     * Popup detalhado para gestores
+     * Cria popup para perfil civil
      */
-    createGestorPopup(zone) {
+    createCivilPopup(zone) {
         return `
-            <div class="popup-content gestor-popup">
-                <div class="popup-title">
-                    <i class="fas fa-map-marker-alt"></i>
-                    ${zone.nome}
-                </div>
-                <div class="popup-data">
-                    <div class="data-row">
-                        <strong>Região:</strong> ${zone.regiao}
-                    </div>
-                    <div class="data-row">
-                        <strong>Temperatura:</strong> ${zone.temperatura}°C
-                    </div>
-                    <div class="data-row">
-                        <strong>NDVI:</strong> ${zone.ndvi.toFixed(2)}
-                    </div>
-                    <div class="data-row">
-                        <strong>Densidade:</strong> ${zone.densidade_populacional.toLocaleString()} hab/km²
-                    </div>
-                    <div class="data-row">
-                        <strong>Índice:</strong> ${zone.indice_criticidade.toFixed(1)}
-                    </div>
-                    <div class="data-row">
-                        <strong>Status:</strong> 
-                        <span class="status-badge ${zone.classificacao.toLowerCase()}">${zone.classificacao}</span>
-                    </div>
-                </div>
-                <div class="popup-action">
-                    <small>Clique para ver detalhes completos e relatório</small>
-                </div>
+            <div class="civil-popup">
+                <h6 class="popup-title">${zone.nome}</h6>
+                <p><strong>Região:</strong> ${zone.regiao || 'São Paulo'}</p>
+                <p><strong>Temperatura:</strong> ${zone.temperatura.toFixed(1)}°C</p>
+                <p><strong>Status:</strong> 
+                    <span class="badge ${zone.classificacao.toLowerCase()}">${zone.classificacao}</span>
+                </p>
+                ${zone.classificacao === 'Crítica' ? 
+                    '<div class="alert alert-danger mt-2 mb-0"><small>Esta zona precisa de ajuda!</small></div>' : 
+                    ''
+                }
             </div>
         `;
     }
 
     /**
-     * Popup simplificado para civis
+     * Cria popup para perfil gestor
      */
-    createCivilPopup(zone) {
-        const needsHelp = zone.classificacao !== 'Segura';
-        const helpIcon = needsHelp ? '🌳' : '✅';
-        const helpText = needsHelp ? 'Precisa de Ajuda' : 'Bem Cuidada';
-
+    createGestorPopup(zone) {
         return `
-            <div class="popup-content civil-popup">
-                <div class="popup-title">
-                    ${helpIcon} ${zone.nome}
-                </div>
-                <div class="popup-data">
-                    <div class="data-row">
-                        <strong>Região:</strong> ${zone.regiao}
-                    </div>
-                    <div class="data-row">
-                        <strong>Status:</strong> 
-                        <span class="status-badge ${zone.classificacao.toLowerCase()}">${helpText}</span>
-                    </div>
-                </div>
-                <div class="popup-action">
-                    <small>Clique para ver como você pode ajudar</small>
-                </div>
+            <div class="gestor-popup">
+                <h6 class="popup-title">${zone.nome}</h6>
+                <p><strong>Região:</strong> ${zone.regiao || 'São Paulo'}</p>
+                <p><strong>Temperatura:</strong> ${zone.temperatura.toFixed(1)}°C</p>
+                <p><strong>NDVI:</strong> ${zone.ndvi.toFixed(2)}</p>
+                <p><strong>Densidade:</strong> ${zone.densidade_populacional.toLocaleString()} hab/km²</p>
+                <p><strong>Criticidade:</strong> ${zone.indice_criticidade.toFixed(1)}</p>
+                <p><strong>Classificação:</strong> 
+                    <span class="badge ${zone.classificacao.toLowerCase()}">${zone.classificacao}</span>
+                </p>
             </div>
         `;
     }
@@ -184,35 +127,49 @@ class MapManager {
      * Manipula clique em uma zona
      */
     onZoneClick(zone) {
-        if (this.currentProfile === 'gestor') {
-            this.showGestorModal(zone);
-        } else {
+        console.log('📍 Zona clicada:', zone.nome);
+        
+        if (this.currentProfile === 'civil') {
             this.showCivilModal(zone);
+        } else {
+            this.showZoneDetails(zone);
         }
     }
 
     /**
-     * Mostra modal detalhado para gestores
-     */
-    showGestorModal(zone) {
-        // Implementação será feita no arquivo gestor.js
-        if (window.GestorManager) {
-            window.GestorManager.showZoneDetails(zone);
-        }
-    }
-
-    /**
-     * Mostra modal simplificado para civis
+     * Mostra modal para perfil civil
      */
     showCivilModal(zone) {
-        // Implementação será feita no arquivo civil.js
         if (window.CivilManager) {
-            window.CivilManager.showZoneDetails(zone);
+            window.CivilManager.showCivilModal(zone);
         }
     }
 
     /**
-     * Remove todos os marcadores do mapa
+     * Mostra detalhes da zona para perfil gestor
+     */
+    showZoneDetails(zone) {
+        const detailsCard = document.getElementById('zone-details-card');
+        const detailsContent = document.getElementById('zone-details-content');
+        
+        if (detailsCard && detailsContent) {
+            detailsContent.innerHTML = `
+                <h6>${zone.nome}</h6>
+                <p><strong>Região:</strong> ${zone.regiao || 'São Paulo'}</p>
+                <p><strong>Temperatura:</strong> ${zone.temperatura.toFixed(1)}°C</p>
+                <p><strong>NDVI:</strong> ${zone.ndvi.toFixed(2)}</p>
+                <p><strong>Densidade:</strong> ${zone.densidade_populacional.toLocaleString()} hab/km²</p>
+                <p><strong>Criticidade:</strong> ${zone.indice_criticidade.toFixed(1)}</p>
+                <p><strong>Classificação:</strong> 
+                    <span class="badge ${zone.classificacao.toLowerCase()}">${zone.classificacao}</span>
+                </p>
+            `;
+            detailsCard.style.display = 'block';
+        }
+    }
+
+    /**
+     * Limpa todos os marcadores
      */
     clearMarkers() {
         this.markers.forEach(marker => {
@@ -222,56 +179,12 @@ class MapManager {
     }
 
     /**
-     * Filtra marcadores por classificação
-     */
-    filterMarkers(classification) {
-        this.markers.forEach(marker => {
-            const zone = marker.zone;
-            if (!classification || zone.classificacao === classification) {
-                marker.setOpacity(1);
-                marker.setFillOpacity(0.8);
-            } else {
-                marker.setOpacity(0.3);
-                marker.setFillOpacity(0.2);
-            }
-        });
-    }
-
-    /**
-     * Atualiza perfil do usuário
+     * Define o perfil atual
      */
     setProfile(profile) {
         this.currentProfile = profile;
-        // Recarrega marcadores com novo perfil
-        if (this.markers.length > 0) {
-            this.refreshMarkers();
-        }
-    }
-
-    /**
-     * Atualiza marcadores com novo perfil
-     */
-    refreshMarkers() {
-        this.markers.forEach(marker => {
-            const zone = marker.zone;
-            const popupContent = this.createPopupContent(zone);
-            marker.setPopupContent(popupContent);
-        });
-    }
-
-    /**
-     * Destroi o mapa
-     */
-    destroy() {
-        if (this.map) {
-            this.map.remove();
-            this.map = null;
-        }
-        this.markers = [];
-        this.initialized = false;
     }
 }
 
 // Instância global do MapManager
 window.MapManager = new MapManager();
-

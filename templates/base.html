@@ -1,49 +1,66 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Cidades Frias, Corações Quentes - São Paulo{% endblock %}</title>
+    <meta name="description" content="Sistema Clima Vida - Identificação e análise de ilhas de calor urbano em São Paulo">
+    <meta name="keywords" content="ilhas de calor, São Paulo, temperatura urbana, sustentabilidade, meio ambiente">
+    <meta name="author" content="NASA Space Apps Hackathon 2025">
+    
+    <title>{% block title %}Clima Vida - Sistema de Análise de Ilhas de Calor{% endblock %}</title>
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
     
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
     
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous">
     
-    <!-- Custom CSS -->
+    <!-- Custom CSS System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accessibility.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile-specific.css') }}">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="sr-only focus-visible">Pular para o conteúdo principal</a>
+    
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-snowflake"></i>
-                Cidades Frias, Corações Quentes
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: var(--gradient-primary);" role="navigation" aria-label="Navegação principal">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}" aria-label="Clima Vida - Página inicial">
+                <i class="fas fa-thermometer-half me-2" aria-hidden="true"></i>
+                <span>Clima Vida</span>
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="fas fa-map"></i> Mapa
+                        <a class="nav-link d-flex align-items-center" href="{{ url_for('index') }}" aria-label="Visualizar mapa">
+                            <i class="fas fa-map me-2" aria-hidden="true"></i>
+                            <span>Mapa</span>
                         </a>
                     </li>
                     {% if session.user_profile == 'gestor' %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('generate_report') }}">
-                            <i class="fas fa-file-pdf"></i> Relatórios
+                        <a class="nav-link d-flex align-items-center" href="{{ url_for('relatorios') }}" aria-label="Ver relatórios">
+                            <i class="fas fa-chart-line me-2" aria-hidden="true"></i>
+                            <span>Relatórios</span>
                         </a>
                     </li>
                     {% endif %}
@@ -52,23 +69,32 @@
                 <ul class="navbar-nav">
                     {% if session.user_profile %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user"></i> {{ session.user_name }}
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown" 
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Menu do usuário">
+                            <i class="fas fa-user me-2" aria-hidden="true"></i>
+                            <span>{{ session.user_name }}</span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><span class="dropdown-item-text">
-                                <i class="fas fa-badge-check"></i> {{ session.profile_name }}
-                            </span></li>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li>
+                                <span class="dropdown-item-text d-flex align-items-center">
+                                    <i class="fas fa-badge-check me-2 text-success" aria-hidden="true"></i>
+                                    <span>{{ session.profile_name }}</span>
+                                </span>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                                <i class="fas fa-sign-out-alt"></i> Sair
-                            </a></li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="{{ url_for('logout') }}" aria-label="Fazer logout">
+                                    <i class="fas fa-sign-out-alt me-2" aria-hidden="true"></i>
+                                    <span>Sair</span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">
-                            <i class="fas fa-sign-in-alt"></i> Entrar
+                        <a class="nav-link d-flex align-items-center" href="{{ url_for('login') }}" aria-label="Fazer login">
+                            <i class="fas fa-sign-in-alt me-2" aria-hidden="true"></i>
+                            <span>Entrar</span>
                         </a>
                     </li>
                     {% endif %}
@@ -78,38 +104,57 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="{% block main_class %}{% endblock %}">
+    <main id="main-content" class="{% block main_class %}{% endblock %}" role="main">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-light text-center text-muted py-3 mt-5">
+    <footer class="bg-secondary text-center py-4 mt-5" role="contentinfo">
         <div class="container">
-            <p class="mb-0">
-                <i class="fas fa-leaf"></i> 
-                Cidades Frias, Corações Quentes - São Paulo 2025
-            </p>
+            <div class="row align-items-center">
+                <div class="col-md-6 text-md-start">
+                    <p class="mb-0 text-muted">
+                        <i class="fas fa-thermometer-half me-2" aria-hidden="true"></i>
+                        <strong>Clima Vida</strong> - Sistema de Análise de Ilhas de Calor
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-muted">
+                        <small>
+                            <i class="fas fa-rocket me-1" aria-hidden="true"></i>
+                            NASA Space Apps Hackathon 2025
+                        </small>
+                    </p>
+                </div>
+            </div>
         </div>
     </footer>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" 
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+            crossorigin="anonymous"></script>
     
     <!-- Core JavaScript -->
-    <script src="{{ url_for('static', filename='js/core/map-manager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/core/data-manager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/core/ui-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/map-manager.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/core/data-manager.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/core/ui-manager.js') }}" defer></script>
+    
+    <!-- Theme Manager -->
+    <script src="{{ url_for('static', filename='js/components/theme-manager.js') }}" defer></script>
     
     <!-- Profile-specific JavaScript -->
     {% if session.user_profile == 'gestor' %}
-        <script src="{{ url_for('static', filename='js/profiles/gestor.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/profiles/gestor.js') }}" defer></script>
     {% elif session.user_profile == 'civil' %}
-        <script src="{{ url_for('static', filename='js/profiles/civil.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/profiles/civil.js') }}" defer></script>
     {% endif %}
     
     <!-- App Initialization -->
-    <script src="{{ url_for('static', filename='js/app-init.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app-init.js') }}" defer></script>
     
     {% block extra_js %}{% endblock %}
 </body>

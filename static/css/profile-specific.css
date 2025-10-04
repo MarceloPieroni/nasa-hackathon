@@ -148,6 +148,37 @@
     margin-bottom: 0.25rem;
 }
 
+/* Seletor de cidade */
+.city-selector {
+    margin-bottom: 1rem;
+}
+
+.city-selector .form-select {
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.city-selector .form-select:focus {
+    border-color: rgba(255,255,255,0.6);
+    box-shadow: 0 0 0 0.2rem rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.2);
+}
+
+.city-selector .form-select option {
+    background: #2E86AB;
+    color: white;
+}
+
+.city-info {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-style: italic;
+}
+
 /* Responsivo específico por perfil */
 @media (max-width: 768px) {
     .sidebar-gestor,
@@ -168,5 +199,9 @@
     .gestor-popup,
     .civil-popup {
         min-width: 200px;
+    }
+    
+    .city-selector .form-select {
+        font-size: 0.8rem;
     }
 }

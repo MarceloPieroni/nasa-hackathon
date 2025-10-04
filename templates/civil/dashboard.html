@@ -20,78 +20,75 @@
                 </div>
             </div>
             
-            <!-- Estatísticas Simplificadas -->
-            <div class="info-card mb-4">
-                <h5><i class="fas fa-chart-pie"></i> Resumo</h5>
-                <div id="civil-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Zonas que Precisam de Ajuda:</span>
-                        <span class="stat-value" id="needs-help">-</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Zonas Bem Cuidadas:</span>
-                        <span class="stat-value" id="well-cared">-</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Legenda Simplificada -->
-            <div class="info-card mb-4">
-                <h5><i class="fas fa-map-marked-alt"></i> Como Ajudar</h5>
-                <div class="legend-item">
-                    <span class="legend-color critical"></span>
-                    <span>Precisa de Ajuda Urgente</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color medium"></span>
-                    <span>Pode Melhorar</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color safe"></span>
-                    <span>Bem Cuidada</span>
-                </div>
-            </div>
-            
-            <!-- Informações de Contato -->
+            <!-- Informações Gerais -->
             <div class="info-card">
-                <h5><i class="fas fa-phone"></i> Como Participar</h5>
+                <h5><i class="fas fa-info-circle"></i> Como Funciona</h5>
+                <p class="text-light">
+                    Clique nos marcadores vermelhos no mapa para ver zonas que precisam de ajuda com arborização.
+                </p>
+            </div>
+            
+            <!-- Estatísticas Simples -->
+            <div class="info-card">
+                <h5><i class="fas fa-chart-pie"></i> Resumo</h5>
+                <div class="stats-simple">
+                    <div class="stat-simple">
+                        <span class="stat-number" id="civil-total-zones">-</span>
+                        <span class="stat-label">Zonas Mapeadas</span>
+                    </div>
+                    <div class="stat-simple">
+                        <span class="stat-number" id="civil-critical-zones">-</span>
+                        <span class="stat-label">Precisam de Ajuda</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ações -->
+            <div class="info-card">
+                <h5><i class="fas fa-hands-helping"></i> Como Posso Ajudar?</h5>
+                <ul class="help-list">
+                    <li><i class="fas fa-seedling"></i> Plantio de árvores</li>
+                    <li><i class="fas fa-water"></i> Cuidado com plantas</li>
+                    <li><i class="fas fa-users"></i> Organização de mutirões</li>
+                    <li><i class="fas fa-share"></i> Divulgação da causa</li>
+                </ul>
+            </div>
+            
+            <!-- Contato -->
+            <div class="info-card">
+                <h5><i class="fas fa-phone"></i> Contato</h5>
                 <div class="contact-info">
-                    <p><i class="fas fa-envelope"></i> voluntarios@cidadesfrias.com.br</p>
+                    <p><i class="fas fa-envelope"></i> civis@cidadesfrias.com.br</p>
                     <p><i class="fas fa-phone"></i> (11) 99999-9999</p>
                     <p><i class="fas fa-globe"></i> cidadesfrias.com.br/civis</p>
                 </div>
-                <div class="mt-3">
-                    <button class="btn btn-success w-100" onclick="showCivilInfo()">
-                        <i class="fas fa-info-circle"></i> Saiba Mais
-                    </button>
-                </div>
             </div>
             
-            <!-- Detalhes da Zona Selecionada -->
+            <!-- Detalhes da Zona -->
             <div class="info-card mt-4" id="civil-zone-details" style="display: none;">
-                <h5><i class="fas fa-info-circle"></i> Como Posso Ajudar?</h5>
+                <h5><i class="fas fa-map-marker-alt"></i> Zona Selecionada</h5>
                 <div id="civil-zone-content">
-                    <!-- Conteúdo será preenchido via JavaScript -->
+                    <!-- Conteúdo será preenchido dinamicamente -->
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Mapa Principal -->
-    <div class="col-md-9 main-content">
-        <div id="map" class="map-container"></div>
-        
-        <!-- Loading overlay -->
-        <div id="loading" class="loading-overlay">
-            <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Carregando...</span>
+    <!-- Mapa -->
+    <div class="col-md-9">
+        <div class="map-container">
+            <div id="map"></div>
+            <div id="loading" class="loading-overlay">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p>Carregando zonas que precisam de ajuda...</p>
             </div>
-            <p>Carregando zonas que precisam de ajuda...</p>
         </div>
     </div>
 </div>
 
-<!-- Modal Simplificado para Civil -->
+<!-- Modal para Ações -->
 <div class="modal fade" id="civilModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -101,8 +98,10 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="civilModalBody">
-                <!-- Conteúdo será preenchido via JavaScript -->
+            <div class="modal-body">
+                <div id="civilModalContent">
+                    <!-- Conteúdo será preenchido dinamicamente -->
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" onclick="contactCivil()">
@@ -117,105 +116,21 @@
 </div>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-.sidebar-civil {
-    background: linear-gradient(135deg, #A23B72 0%, #F18F01 100%);
-    color: white;
-    min-height: 100vh;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-}
+{% block extra_js %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-.profile-header h2 {
-    color: white;
-    font-weight: 300;
-    border-bottom: 2px solid rgba(255,255,255,0.3);
-    padding-bottom: 1rem;
-}
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-.profile-badge {
-    background: rgba(255,255,255,0.2);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
+<!-- Core JavaScript -->
+<script src="{{ url_for('static', filename='js/core/data-manager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/core/map-manager.js') }}"></script>
+<script src="{{ url_for('static', filename='js/core/ui-manager.js') }}"></script>
 
-.info-card {
-    background: rgba(255,255,255,0.1);
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.2);
-}
+<!-- Profile-specific JavaScript -->
+<script src="{{ url_for('static', filename='js/profiles/civil.js') }}"></script>
 
-.info-card h5 {
-    color: white;
-    margin-bottom: 1rem;
-    font-weight: 500;
-}
-
-.legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    margin-right: 10px;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    display: inline-block;
-}
-
-.legend-color.critical { background-color: #FF4444; }
-.legend-color.medium { background-color: #FFA500; }
-.legend-color.safe { background-color: #44FF44; }
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-}
-
-.stat-label {
-    font-size: 0.9rem;
-}
-
-.stat-value {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.contact-info p {
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.map-container {
-    height: 100vh;
-    width: 100%;
-}
-
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(248, 249, 250, 0.95);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.loading-overlay p {
-    margin-top: 1rem;
-    color: #6c757d;
-    font-size: 1.1rem;
-}
-</style>
+<!-- App Initialization -->
+<script src="{{ url_for('static', filename='js/app-init.js') }}"></script>
 {% endblock %}

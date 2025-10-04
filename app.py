@@ -49,38 +49,26 @@ class HeatIslandAnalyzer:
         if zone.empty:
             return None
         
-        zone_data = zone.iloc[0]
-        classificacao = zone_data['classificacao']
+        zone_data = zone.iloc[0].to_dict()
         
-        # Usa configurações do sistema para sugestões
-        suggestions = Config.ACTION_SUGGESTIONS.get(classificacao, {})
+        # Adiciona sugestões de ações baseadas na classificação
+        classification = zone_data['classificacao']
+        if classification in Config.ACTION_SUGGESTIONS:
+            zone_data['action_suggestion'] = Config.ACTION_SUGGESTIONS[classification]
         
-        return {
-            'id': zone_data['id'],
-            'nome': zone_data['nome'],
-            'regiao': zone_data.get('regiao', 'São Paulo'),
-            'temperatura': zone_data['temperatura'],
-            'ndvi': zone_data['ndvi'],
-            'densidade_populacional': zone_data['densidade_populacional'],
-            'indice_criticidade': round(zone_data['indice_criticidade'], 2),
-            'classificacao': zone_data['classificacao'],
-            'acao_sugerida': suggestions.get('action', 'Ação não definida'),
-            'custo_estimado': suggestions.get('cost_range', 'Custo não estimado'),
-            'especies_recomendadas': suggestions.get('species', 'Espécies não definidas'),
-            'civil_message': suggestions.get('civil_message', ''),
-            'civil_description': suggestions.get('civil_description', '')
-        }
+        return zone_data
     
-    def generate_report_data(self):
-        """Gera dados para o relatório PDF"""
+    def get_report_data(self):
+        """Retorna dados formatados para relatório"""
         report_data = []
         for _, row in self.data.iterrows():
             report_data.append({
-                'bairro': row['nome'],
-                'temperatura': row['temperatura'],
-                'ndvi': row['ndvi'],
-                'densidade': row['densidade_populacional'],
-                'criticidade': row['indice_criticidade'],
+                'nome': row['nome'],
+                'regiao': row.get('regiao', 'São Paulo'),
+                'temperatura': round(row['temperatura'], 1),
+                'ndvi': round(row['ndvi'], 2),
+                'densidade_populacional': int(row['densidade_populacional']),
+                'criticidade': round(row['indice_criticidade'], 1),
                 'classificacao': row['classificacao']
             })
         
@@ -106,36 +94,24 @@ def index():
 
 @app.route('/login')
 def login():
-    """Página de login com seleção de perfil"""
+    """Página de login"""
     return render_template('auth/login.html')
 
 @app.route('/auth/login', methods=['POST'])
 def auth_login():
-    """Processa login do usuário"""
-    data = request.get_json()
-    profile = data.get('profile')
+    """Autenticação de login"""
+    profile = request.form.get('profile')
     
     if profile in ['gestor', 'civil']:
-        # Simula login - em produção seria autenticação real
         session['user_profile'] = profile
-        session['user_name'] = Config.USER_PROFILES[profile.upper()]['name']
-        session['profile_name'] = Config.USER_PROFILES[profile.upper()]['name']
-        
-        return jsonify({
-            'success': True,
-            'message': f'Login realizado como {profile}',
-            'redirect': url_for('index')
-        })
+        return jsonify({'success': True, 'redirect': url_for('index')})
     else:
-        return jsonify({
-            'success': False,
-            'message': 'Perfil inválido'
-        }), 400
+        return jsonify({'success': False, 'error': 'Perfil inválido'})
 
 @app.route('/logout')
 def logout():
     """Logout do usuário"""
-    session.clear()
+    session.pop('user_profile', None)
     return redirect(url_for('login'))
 
 @app.route('/relatorios')
@@ -151,129 +127,122 @@ def relatorios():
     if session['user_profile'] != 'gestor':
         return redirect(url_for('index'))
     
-    return render_template('relatorios.html')
+    # Prepara dados para o template
+    zones_data = []
+    for _, row in analyzer.data.iterrows():
+        zones_data.append({
+            'nome': row['nome'],
+            'regiao': row.get('regiao', 'São Paulo'),
+            'temperatura': float(row['temperatura']),
+            'ndvi': float(row['ndvi']),
+            'densidade_populacional': int(row['densidade_populacional']),
+            'indice_criticidade': float(row['indice_criticidade']),
+            'classificacao': row['classificacao']
+        })
+    
+    return render_template('relatorios.html', zones=zones_data)
 
 @app.route('/api/zones')
 def get_zones():
     """Retorna dados de todas as zonas para o mapa"""
-    # Verifica se foi especificada uma cidade
-    city = request.args.get('city', 'sao_paulo')
+    zones_data = []
+    for _, row in analyzer.data.iterrows():
+        zones_data.append({
+            'id': row['id'],
+            'nome': row['nome'],
+            'regiao': row.get('regiao', 'São Paulo'),  # Adiciona região se disponível
+            'latitude': row['latitude'],
+            'longitude': row['longitude'],
+            'temperatura': row['temperatura'],
+            'ndvi': row['ndvi'],
+            'densidade_populacional': row['densidade_populacional'],
+            'indice_criticidade': round(row['indice_criticidade'], 2),
+            'classificacao': row['classificacao'],
+            'cor': row['cor']
+        })
     
-    # Valida cidade
-    if city not in Config.CITIES:
-        return jsonify({'error': 'Cidade não encontrada'}), 404
-    
-    try:
-        # Carrega dados da cidade especificada
-        city_config = Config.CITIES[city]
-        city_analyzer = HeatIslandAnalyzer(city_config['csv_file'])
-        
-        zones_data = []
-        for _, row in city_analyzer.data.iterrows():
-            zones_data.append({
-                'id': row['id'],
-                'nome': row['nome'],
-                'regiao': row.get('regiao', city_config['name']),
-                'latitude': row['latitude'],
-                'longitude': row['longitude'],
-                'temperatura': row['temperatura'],
-                'ndvi': row['ndvi'],
-                'densidade_populacional': row['densidade_populacional'],
-                'indice_criticidade': round(row['indice_criticidade'], 2),
-                'classificacao': row['classificacao'],
-                'cor': row['cor']
-            })
-        
-        return jsonify(zones_data)
-        
-    except Exception as e:
-        logger.error(f"Erro ao carregar dados da cidade {city}: {e}")
-        return jsonify({'error': 'Erro ao carregar dados da cidade'}), 500
+    return jsonify(zones_data)
 
 @app.route('/api/zone/<int:zone_id>')
 def get_zone(zone_id):
     """Retorna dados detalhados de uma zona específica"""
     zone_data = analyzer.get_zone_data(zone_id)
-    if zone_data:
-        return jsonify(zone_data)
-    else:
+    
+    if zone_data is None:
         return jsonify({'error': 'Zona não encontrada'}), 404
+    
+    return jsonify(zone_data)
 
 @app.route('/api/report')
 def generate_report():
     """Gera e retorna relatório PDF"""
-    report_data = analyzer.generate_report_data()
-    
-    # Cria arquivo temporário para o PDF
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
-    temp_file.close()
-    
-    # Cria o PDF
-    doc = SimpleDocTemplate(temp_file.name, pagesize=letter)
-    styles = getSampleStyleSheet()
-    story = []
-    
-    # Título
-    title = Paragraph("Relatório de Ilhas de Calor Urbano", styles['Title'])
-    story.append(title)
-    story.append(Spacer(1, 12))
-    
-    # Data de geração
-    date_para = Paragraph(f"Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}", styles['Normal'])
-    story.append(date_para)
-    story.append(Spacer(1, 20))
-    
-    # Tabela de dados
-    table_data = [['Bairro', 'Temp (°C)', 'NDVI', 'Densidade', 'Criticidade', 'Classificação']]
-    
-    for data in report_data:
-        table_data.append([
-            data['bairro'],
-            f"{data['temperatura']:.1f}",
-            f"{data['ndvi']:.2f}",
-            f"{data['densidade']:.0f}",
-            f"{data['criticidade']:.2f}",
-            data['classificacao']
-        ])
-    
-    table = Table(table_data)
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black)
-    ]))
-    
-    story.append(table)
-    story.append(Spacer(1, 20))
-    
-    # Resumo de ações
-    story.append(Paragraph("Resumo de Ações Recomendadas:", styles['Heading2']))
-    
-    criticas = len([d for d in report_data if d['classificacao'] == 'Crítica'])
-    medias = len([d for d in report_data if d['classificacao'] == 'Média'])
-    seguras = len([d for d in report_data if d['classificacao'] == 'Segura'])
-    
-    story.append(Paragraph(f"• Zonas Críticas: {criticas} bairros", styles['Normal']))
-    story.append(Paragraph(f"• Zonas Médias: {medias} bairros", styles['Normal']))
-    story.append(Paragraph(f"• Zonas Seguras: {seguras} bairros", styles['Normal']))
-    
-    story.append(Spacer(1, 12))
-    story.append(Paragraph("Ações Prioritárias:", styles['Heading3']))
-    story.append(Paragraph("1. Implementar telhados verdes em zonas críticas", styles['Normal']))
-    story.append(Paragraph("2. Plantio de árvores de grande porte em corredores verdes", styles['Normal']))
-    story.append(Paragraph("3. Criação de parques e áreas de lazer com vegetação", styles['Normal']))
-    story.append(Paragraph("4. Implementação de pavimentos permeáveis", styles['Normal']))
-    
-    doc.build(story)
-    
-    return send_file(temp_file.name, as_attachment=True, download_name='relatorio_ilhas_calor.pdf')
+    try:
+        # Cria arquivo temporário
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+        temp_file.close()
+        
+        # Cria o documento PDF
+        doc = SimpleDocTemplate(temp_file.name, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
+        
+        # Título
+        title = Paragraph(Config.PDF_TITLE, styles['Title'])
+        story.append(title)
+        story.append(Spacer(1, 12))
+        
+        # Subtítulo
+        subtitle = Paragraph(Config.PDF_SUBTITLE, styles['Heading2'])
+        story.append(subtitle)
+        story.append(Spacer(1, 12))
+        
+        # Data
+        date_str = datetime.now().strftime("%d/%m/%Y %H:%M")
+        date_para = Paragraph(f"Gerado em: {date_str}", styles['Normal'])
+        story.append(date_para)
+        story.append(Spacer(1, 20))
+        
+        # Dados do relatório
+        report_data = analyzer.get_report_data()
+        
+        # Cabeçalho da tabela
+        table_data = [['Zona', 'Região', 'Temp. (°C)', 'NDVI', 'Densidade', 'Criticidade', 'Classificação']]
+        
+        # Adiciona dados das zonas
+        for zone in report_data:
+            table_data.append([
+                zone['nome'],
+                zone['regiao'],
+                str(zone['temperatura']),
+                str(zone['ndvi']),
+                f"{zone['densidade_populacional']:,}",
+                str(zone['criticidade']),
+                zone['classificacao']
+            ])
+        
+        # Cria a tabela
+        table = Table(table_data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        story.append(table)
+        
+        # Constrói o PDF
+        doc.build(story)
+        
+        # Retorna o arquivo
+        return send_file(temp_file.name, as_attachment=True, download_name=f'relatorio_ilhas_calor_{datetime.now().strftime("%Y%m%d_%H%M")}.pdf')
+        
+    except Exception as e:
+        return jsonify({'error': f'Erro ao gerar relatório: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    # Cria diretório de dados se não existir
-    os.makedirs('data', exist_ok=True)
     app.run(debug=True, host='0.0.0.0', port=5000)
