@@ -1,12 +1,12 @@
 /**
- * UI Manager - Gerenciador de Interface do Usuário
+ * UI Manager - Gerenciador de Interface
  * Sistema Cidades Frias, Corações Quentes
  */
 
 class UIManager {
     constructor() {
         this.notifications = [];
-        this.loadingOverlay = null;
+        this.loadingElements = [];
     }
 
     /**
@@ -26,7 +26,7 @@ class UIManager {
     /**
      * Mostra notificação de informação
      */
-    showInfo(message, duration = 3000) {
+    showInfo(message, duration = 4000) {
         this.showNotification(message, 'info', duration);
     }
 
@@ -38,234 +38,197 @@ class UIManager {
     }
 
     /**
-     * Cria e mostra notificação
+     * Cria e exibe notificação
      */
     showNotification(message, type = 'info', duration = 3000) {
         const notification = document.createElement('div');
-        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.className = `alert alert-${type} position-fixed notification`;
         notification.style.cssText = `
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 300px;
-            max-width: 500px;
+            top: 20px; 
+            right: 20px; 
+            z-index: 9999; 
+            min-width: 300px; 
+            max-width: 400px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            animation: slideInRight 0.3s ease-out;
         `;
-
-        const icon = this.getNotificationIcon(type);
+        
+        const icon = this.getIconForType(type);
         notification.innerHTML = `
-            ${icon} ${message}
-            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            <div class="d-flex align-items-center">
+                <i class="${icon} me-2"></i>
+                <span class="flex-grow-1">${message}</span>
+                <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
         `;
-
+        
         document.body.appendChild(notification);
-
+        this.notifications.push(notification);
+        
         // Auto remove após duração especificada
         setTimeout(() => {
             if (notification.parentElement) {
-                notification.classList.remove('show');
+                notification.style.animation = 'slideOutRight 0.3s ease-in';
                 setTimeout(() => {
                     if (notification.parentElement) {
                         notification.remove();
                     }
-                }, 150);
+                }, 300);
             }
         }, duration);
-
-        this.notifications.push(notification);
     }
 
     /**
-     * Retorna ícone para tipo de notificação
+     * Retorna ícone baseado no tipo de notificação
      */
-    getNotificationIcon(type) {
+    getIconForType(type) {
         const icons = {
-            success: '<i class="fas fa-check-circle"></i>',
-            danger: '<i class="fas fa-exclamation-circle"></i>',
-            info: '<i class="fas fa-info-circle"></i>',
-            warning: '<i class="fas fa-exclamation-triangle"></i>'
+            'success': 'fas fa-check-circle',
+            'danger': 'fas fa-exclamation-circle',
+            'info': 'fas fa-info-circle',
+            'warning': 'fas fa-exclamation-triangle'
         };
-        return icons[type] || icons.info;
+        return icons[type] || 'fas fa-info-circle';
     }
 
     /**
      * Mostra loading overlay
      */
     showLoading(message = 'Carregando...') {
-        this.hideLoading(); // Remove loading anterior se existir
-
-        this.loadingOverlay = document.createElement('div');
-        this.loadingOverlay.className = 'loading-overlay-global';
-        this.loadingOverlay.style.cssText = `
-            position: fixed;
+        const loading = document.createElement('div');
+        loading.id = 'ui-loading-overlay';
+        loading.className = 'position-fixed loading-overlay';
+        loading.style.cssText = `
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10000;
         `;
-
-        this.loadingOverlay.innerHTML = `
+        
+        loading.innerHTML = `
             <div class="spinner-border text-primary mb-3" role="status">
                 <span class="visually-hidden">Carregando...</span>
             </div>
-            <p class="text-muted">${message}</p>
+            <p class="text-white">${message}</p>
         `;
-
-        document.body.appendChild(this.loadingOverlay);
+        
+        document.body.appendChild(loading);
+        this.loadingElements.push(loading);
     }
 
     /**
      * Esconde loading overlay
      */
     hideLoading() {
-        if (this.loadingOverlay && this.loadingOverlay.parentElement) {
-            this.loadingOverlay.remove();
-            this.loadingOverlay = null;
+        this.loadingElements.forEach(loading => {
+            if (loading.parentElement) {
+                loading.remove();
+            }
+        });
+        this.loadingElements = [];
+    }
+
+    /**
+     * Cria modal de confirmação
+     */
+    showConfirm(title, message, onConfirm, onCancel = null) {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <button type="button" class="btn btn-primary" id="confirm-btn">
+                            Confirmar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+        
+        // Event listeners
+        document.getElementById('confirm-btn').addEventListener('click', () => {
+            bootstrapModal.hide();
+            if (onConfirm) onConfirm();
+            modal.remove();
+        });
+        
+        modal.addEventListener('hidden.bs.modal', () => {
+            if (onCancel) onCancel();
+            modal.remove();
+        });
+    }
+
+    /**
+     * Atualiza progress bar
+     */
+    updateProgress(percentage, message = '') {
+        let progressBar = document.getElementById('ui-progress-bar');
+        
+        if (!progressBar) {
+            progressBar = document.createElement('div');
+            progressBar.id = 'ui-progress-bar';
+            progressBar.className = 'position-fixed';
+            progressBar.style.cssText = `
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                z-index: 10001;
+                background: rgba(0,0,0,0.1);
+            `;
+            
+            progressBar.innerHTML = `
+                <div class="progress-bar bg-primary" style="width: 0%; transition: width 0.3s ease;"></div>
+            `;
+            
+            document.body.appendChild(progressBar);
+        }
+        
+        const bar = progressBar.querySelector('.progress-bar');
+        bar.style.width = `${percentage}%`;
+        
+        if (message) {
+            this.showInfo(message, 2000);
         }
     }
 
     /**
-     * Cria tooltip
+     * Esconde progress bar
      */
-    createTooltip(element, text, placement = 'top') {
-        element.setAttribute('data-bs-toggle', 'tooltip');
-        element.setAttribute('data-bs-placement', placement);
-        element.setAttribute('title', text);
-        
-        // Inicializa tooltip do Bootstrap
-        new bootstrap.Tooltip(element);
-    }
-
-    /**
-     * Formata número para exibição
-     */
-    formatNumber(number, decimals = 2) {
-        return parseFloat(number).toFixed(decimals);
-    }
-
-    /**
-     * Formata data para exibição
-     */
-    formatDate(date) {
-        return new Date(date).toLocaleDateString('pt-BR');
-    }
-
-    /**
-     * Formata temperatura para exibição
-     */
-    formatTemperature(temp) {
-        return `${this.formatNumber(temp, 1)}°C`;
-    }
-
-    /**
-     * Formata NDVI para exibição
-     */
-    formatNDVI(ndvi) {
-        return this.formatNumber(ndvi, 2);
-    }
-
-    /**
-     * Formata densidade populacional para exibição
-     */
-    formatDensity(density) {
-        return density.toLocaleString('pt-BR') + ' hab/km²';
-    }
-
-    /**
-     * Obtém cor baseada na classificação
-     */
-    getClassificationColor(classification) {
-        const colors = {
-            'Crítica': '#FF4444',
-            'Média': '#FFA500',
-            'Segura': '#44FF44'
-        };
-        return colors[classification] || '#666';
-    }
-
-    /**
-     * Cria badge de classificação
-     */
-    createClassificationBadge(classification) {
-        const color = this.getClassificationColor(classification);
-        return `<span class="badge" style="background-color: ${color}; color: white;">${classification}</span>`;
-    }
-
-    /**
-     * Valida email
-     */
-    isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
-    /**
-     * Valida telefone
-     */
-    isValidPhone(phone) {
-        const phoneRegex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
-        return phoneRegex.test(phone);
-    }
-
-    /**
-     * Confirma ação do usuário
-     */
-    confirmAction(message, title = 'Confirmação') {
-        return new Promise((resolve) => {
-            // Cria modal de confirmação
-            const modal = document.createElement('div');
-            modal.className = 'modal fade';
-            modal.innerHTML = `
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">${title}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>${message}</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="button" class="btn btn-primary" id="confirm-btn">Confirmar</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-
-            const bsModal = new bootstrap.Modal(modal);
-
-            // Manipula clique no botão confirmar
-            modal.querySelector('#confirm-btn').addEventListener('click', () => {
-                bsModal.hide();
-                setTimeout(() => {
-                    modal.remove();
-                    resolve(true);
-                }, 300);
-            });
-
-            // Manipula fechamento do modal
-            modal.addEventListener('hidden.bs.modal', () => {
-                modal.remove();
-                resolve(false);
-            });
-
-            bsModal.show();
-        });
+    hideProgress() {
+        const progressBar = document.getElementById('ui-progress-bar');
+        if (progressBar) {
+            progressBar.remove();
+        }
     }
 
     /**
      * Limpa todas as notificações
      */
-    clearAllNotifications() {
+    clearNotifications() {
         this.notifications.forEach(notification => {
             if (notification.parentElement) {
                 notification.remove();
@@ -275,32 +238,58 @@ class UIManager {
     }
 
     /**
-     * Scroll suave para elemento
+     * Anima elemento
      */
-    scrollToElement(element, offset = 0) {
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-        });
+    animateElement(element, animation, duration = 300) {
+        element.style.animation = `${animation} ${duration}ms ease-out`;
+        
+        setTimeout(() => {
+            element.style.animation = '';
+        }, duration);
     }
 
     /**
-     * Copia texto para clipboard
+     * Scroll suave para elemento
      */
-    async copyToClipboard(text) {
-        try {
-            await navigator.clipboard.writeText(text);
-            this.showSuccess('Texto copiado para a área de transferência!');
-        } catch (error) {
-            console.error('Erro ao copiar texto:', error);
-            this.showError('Erro ao copiar texto');
-        }
+    scrollToElement(element, offset = 0) {
+        const elementPosition = element.offsetTop - offset;
+        window.scrollTo({
+            top: elementPosition,
+            behavior: 'smooth'
+        });
     }
 }
 
 // Instância global do UIManager
 window.UIManager = new UIManager();
 
+// Adiciona estilos CSS para animações
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    .notification {
+        animation: slideInRight 0.3s ease-out;
+    }
+`;
+document.head.appendChild(style);

@@ -7,11 +7,11 @@ class DataManager {
     constructor() {
         this.zonesData = [];
         this.statistics = {};
-        this.loaded = false;
+        this.initialized = false;
     }
 
     /**
-     * Carrega dados das zonas via API
+     * Carrega dados das zonas da API
      */
     async loadZonesData() {
         try {
@@ -22,7 +22,7 @@ class DataManager {
             
             this.zonesData = await response.json();
             this.calculateStatistics();
-            this.loaded = true;
+            this.initialized = true;
             
             console.log(`${this.zonesData.length} zonas carregadas`);
             return this.zonesData;
@@ -43,44 +43,45 @@ class DataManager {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const zoneData = await response.json();
-            return zoneData;
+            const zoneDetails = await response.json();
+            return zoneDetails;
             
         } catch (error) {
-            console.error(`Erro ao carregar detalhes da zona ${zoneId}:`, error);
+            console.error('Erro ao carregar detalhes da zona:', error);
             throw error;
         }
     }
 
     /**
-     * Calcula estatísticas gerais
+     * Calcula estatísticas dos dados
      */
     calculateStatistics() {
-        if (!this.zonesData || this.zonesData.length === 0) {
+        if (this.zonesData.length === 0) {
             this.statistics = {
                 total_zones: 0,
                 critical_zones: 0,
                 medium_zones: 0,
                 safe_zones: 0,
                 avg_temperature: 0,
-                avg_ndvi: 0,
-                avg_criticity: 0
+                avg_ndvi: 0
             };
             return;
         }
 
-        const critical = this.zonesData.filter(z => z.classificacao === 'Crítica');
-        const medium = this.zonesData.filter(z => z.classificacao === 'Média');
-        const safe = this.zonesData.filter(z => z.classificacao === 'Segura');
+        const critical = this.zonesData.filter(z => z.classificacao === 'Crítica').length;
+        const medium = this.zonesData.filter(z => z.classificacao === 'Média').length;
+        const safe = this.zonesData.filter(z => z.classificacao === 'Segura').length;
+        
+        const avgTemp = this.zonesData.reduce((sum, z) => sum + z.temperatura, 0) / this.zonesData.length;
+        const avgNDVI = this.zonesData.reduce((sum, z) => sum + z.ndvi, 0) / this.zonesData.length;
 
         this.statistics = {
             total_zones: this.zonesData.length,
-            critical_zones: critical.length,
-            medium_zones: medium.length,
-            safe_zones: safe.length,
-            avg_temperature: this.zonesData.reduce((sum, z) => sum + z.temperatura, 0) / this.zonesData.length,
-            avg_ndvi: this.zonesData.reduce((sum, z) => sum + z.ndvi, 0) / this.zonesData.length,
-            avg_criticity: this.zonesData.reduce((sum, z) => sum + z.indice_criticidade, 0) / this.zonesData.length
+            critical_zones: critical,
+            medium_zones: medium,
+            safe_zones: safe,
+            avg_temperature: avgTemp,
+            avg_ndvi: avgNDVI
         };
     }
 
@@ -89,27 +90,6 @@ class DataManager {
      */
     getStatistics() {
         return this.statistics;
-    }
-
-    /**
-     * Retorna dados de todas as zonas
-     */
-    getAllZones() {
-        return this.zonesData;
-    }
-
-    /**
-     * Retorna zonas filtradas por classificação
-     */
-    getZonesByClassification(classification) {
-        return this.zonesData.filter(zone => zone.classificacao === classification);
-    }
-
-    /**
-     * Retorna zonas que precisam de ajuda (para voluntários)
-     */
-    getZonesNeedingHelp() {
-        return this.zonesData.filter(zone => zone.classificacao !== 'Segura');
     }
 
     /**
@@ -135,94 +115,79 @@ class DataManager {
      * Exporta dados para CSV
      */
     exportToCSV() {
-        if (!this.zonesData || this.zonesData.length === 0) {
-            console.error('Nenhum dado para exportar');
-            return;
+        if (this.zonesData.length === 0) {
+            throw new Error('Nenhum dado disponível para exportação');
         }
 
-        const headers = ['ID', 'Nome', 'Região', 'Latitude', 'Longitude', 'Temperatura', 'NDVI', 'Densidade', 'Criticidade', 'Classificação'];
-        const csvContent = [
+        // Cria cabeçalho CSV
+        const headers = [
+            'ID', 'Nome', 'Região', 'Latitude', 'Longitude', 
+            'Temperatura', 'NDVI', 'Densidade Populacional', 
+            'Índice Criticidade', 'Classificação'
+        ];
+
+        // Cria linhas de dados
+        const csvRows = [
             headers.join(','),
             ...this.zonesData.map(zone => [
                 zone.id,
-                zone.nome,
-                zone.regiao,
+                `"${zone.nome}"`,
+                `"${zone.regiao}"`,
                 zone.latitude,
                 zone.longitude,
                 zone.temperatura,
                 zone.ndvi,
                 zone.densidade_populacional,
                 zone.indice_criticidade,
-                zone.classificacao
+                `"${zone.classificacao}"`
             ].join(','))
-        ].join('\n');
+        ];
 
+        // Cria e baixa arquivo
+        const csvContent = csvRows.join('\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `zonas_calor_sp_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const url = window.URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `zonas_ilhas_calor_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
     }
 
     /**
-     * Busca zonas por nome
+     * Filtra zonas por classificação
      */
-    searchZones(query) {
-        if (!query || query.trim() === '') {
+    filterZonesByClassification(classification) {
+        if (!classification) {
             return this.zonesData;
         }
-
-        const searchTerm = query.toLowerCase();
-        return this.zonesData.filter(zone => 
-            zone.nome.toLowerCase().includes(searchTerm) ||
-            zone.regiao.toLowerCase().includes(searchTerm)
-        );
+        return this.zonesData.filter(zone => zone.classificacao === classification);
     }
 
     /**
-     * Ordena zonas por critério
+     * Busca zona por ID
      */
-    sortZones(criteria = 'indice_criticidade', order = 'desc') {
-        const sorted = [...this.zonesData].sort((a, b) => {
-            let aVal = a[criteria];
-            let bVal = b[criteria];
-
-            if (typeof aVal === 'string') {
-                aVal = aVal.toLowerCase();
-                bVal = bVal.toLowerCase();
-            }
-
-            if (order === 'desc') {
-                return bVal > aVal ? 1 : -1;
-            } else {
-                return aVal > bVal ? 1 : -1;
-            }
-        });
-
-        return sorted;
+    getZoneById(zoneId) {
+        return this.zonesData.find(zone => zone.id === zoneId);
     }
 
     /**
-     * Verifica se os dados foram carregados
+     * Retorna todas as zonas
      */
-    isLoaded() {
-        return this.loaded;
+    getAllZones() {
+        return this.zonesData;
     }
 
     /**
-     * Limpa dados carregados
+     * Verifica se os dados foram inicializados
      */
-    clear() {
-        this.zonesData = [];
-        this.statistics = {};
-        this.loaded = false;
+    isInitialized() {
+        return this.initialized;
     }
 }
 
 // Instância global do DataManager
 window.DataManager = new DataManager();
-

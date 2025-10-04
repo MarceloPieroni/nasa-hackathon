@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for
 import pandas as pd
 import folium
 import os
@@ -9,8 +9,10 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 import tempfile
 import json
+from config import Config
 
 app = Flask(__name__)
+app.config.from_object(Config)
 
 class HeatIslandAnalyzer:
     def __init__(self, csv_file):
@@ -48,32 +50,25 @@ class HeatIslandAnalyzer:
             return None
         
         zone_data = zone.iloc[0]
+        classificacao = zone_data['classificacao']
         
-        # Gera sugestão de ação baseada na classificação
-        if zone_data['classificacao'] == 'Crítica':
-            acao = "PRIORIDADE ALTA: Plantio urgente de árvores e criação de áreas verdes"
-            custo_estimado = "R$ 50.000 - R$ 100.000"
-            especies = "Ipês, Sibipirunas, Flamboyants"
-        elif zone_data['classificacao'] == 'Média':
-            acao = "PRIORIDADE MÉDIA: Ampliação de áreas verdes e telhados verdes"
-            custo_estimado = "R$ 20.000 - R$ 50.000"
-            especies = "Resedás, Quaresmeiras, Palmeiras"
-        else:
-            acao = "MANUTENÇÃO: Preservar áreas verdes existentes"
-            custo_estimado = "R$ 5.000 - R$ 15.000"
-            especies = "Manutenção do verde existente"
+        # Usa configurações do sistema para sugestões
+        suggestions = Config.ACTION_SUGGESTIONS.get(classificacao, {})
         
         return {
             'id': zone_data['id'],
             'nome': zone_data['nome'],
+            'regiao': zone_data.get('regiao', 'São Paulo'),
             'temperatura': zone_data['temperatura'],
             'ndvi': zone_data['ndvi'],
             'densidade_populacional': zone_data['densidade_populacional'],
             'indice_criticidade': round(zone_data['indice_criticidade'], 2),
             'classificacao': zone_data['classificacao'],
-            'acao_sugerida': acao,
-            'custo_estimado': custo_estimado,
-            'especies_recomendadas': especies
+            'acao_sugerida': suggestions.get('action', 'Ação não definida'),
+            'custo_estimado': suggestions.get('cost_range', 'Custo não estimado'),
+            'especies_recomendadas': suggestions.get('species', 'Espécies não definidas'),
+            'volunteer_message': suggestions.get('volunteer_message', ''),
+            'volunteer_description': suggestions.get('volunteer_description', '')
         }
     
     def generate_report_data(self):
@@ -93,12 +88,55 @@ class HeatIslandAnalyzer:
         report_data.sort(key=lambda x: x['criticidade'], reverse=True)
         return report_data
 
-# Inicializa o analisador com dados de exemplo
-analyzer = HeatIslandAnalyzer('data/sample_data.csv')
+# Inicializa o analisador com dados de São Paulo
+analyzer = HeatIslandAnalyzer(Config.CSV_FILE_PATH)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    """Página principal - redireciona baseado no perfil do usuário"""
+    if 'user_profile' not in session:
+        return redirect(url_for('login'))
+    
+    if session['user_profile'] == 'gestor':
+        return render_template('gestor/dashboard.html')
+    elif session['user_profile'] == 'voluntario':
+        return render_template('voluntario/dashboard.html')
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/login')
+def login():
+    """Página de login com seleção de perfil"""
+    return render_template('auth/login.html')
+
+@app.route('/auth/login', methods=['POST'])
+def auth_login():
+    """Processa login do usuário"""
+    data = request.get_json()
+    profile = data.get('profile')
+    
+    if profile in ['gestor', 'voluntario']:
+        # Simula login - em produção seria autenticação real
+        session['user_profile'] = profile
+        session['user_name'] = Config.USER_PROFILES[profile.upper()]['name']
+        session['profile_name'] = Config.USER_PROFILES[profile.upper()]['name']
+        
+        return jsonify({
+            'success': True,
+            'message': f'Login realizado como {profile}',
+            'redirect': url_for('index')
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'message': 'Perfil inválido'
+        }), 400
+
+@app.route('/logout')
+def logout():
+    """Logout do usuário"""
+    session.clear()
+    return redirect(url_for('login'))
 
 @app.route('/api/zones')
 def get_zones():
@@ -108,6 +146,7 @@ def get_zones():
         zones_data.append({
             'id': row['id'],
             'nome': row['nome'],
+            'regiao': row.get('regiao', 'São Paulo'),  # Adiciona região se disponível
             'latitude': row['latitude'],
             'longitude': row['longitude'],
             'temperatura': row['temperatura'],
