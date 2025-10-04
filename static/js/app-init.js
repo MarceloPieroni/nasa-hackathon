@@ -23,17 +23,17 @@ function detectUserProfile() {
         return 'gestor';
     }
     
-    // Verifica se existe sidebar de voluntário
-    if (document.querySelector('.sidebar-voluntario')) {
-        return 'voluntario';
+    // Verifica se existe sidebar de civil
+    if (document.querySelector('.sidebar-civil')) {
+        return 'civil';
     }
     
     // Verifica pelo título da página
     const title = document.title;
     if (title.includes('Gestor')) {
         return 'gestor';
-    } else if (title.includes('Voluntário')) {
-        return 'voluntario';
+    } else if (title.includes('Civil')) {
+        return 'civil';
     }
     
     return 'guest';
@@ -62,9 +62,9 @@ async function initializeManagers(profile) {
         if (profile === 'gestor') {
             window.GestorManager = new GestorManager();
             await window.GestorManager.init();
-        } else if (profile === 'voluntario') {
-            window.VoluntarioManager = new VoluntarioManager();
-            await window.VoluntarioManager.init();
+        } else if (profile === 'civil') {
+            window.CivilManager = new CivilManager();
+            await window.CivilManager.init();
         }
         
         console.log('Aplicação inicializada com sucesso para perfil:', profile);

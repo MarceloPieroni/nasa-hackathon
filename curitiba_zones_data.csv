@@ -1,0 +1,31 @@
+nome_zona,temperatura_media,ndvi,densidade_populacional,regiao
+Santa Felicidade,32.5,0.48,12000,Norte
+Boqueirão,36.1,0.27,19000,Sul
+Cajuru,33.0,0.35,17500,Leste
+Batel,31.2,0.44,21000,Centro
+Centro Cívico,30.8,0.42,20000,Centro
+Pinheirinho,35.0,0.3,18500,Sul
+Hauer,34.7,0.32,17000,Sul
+Água Verde,32.9,0.38,19500,Centro
+Bacacheri,30.1,0.47,13000,Norte
+Tarumã,31.5,0.45,16000,Leste
+Sítio Cercado,36.8,0.25,22000,Sul
+Xaxim,35.5,0.29,21500,Sul
+Capão Raso,34.2,0.31,18000,Sul
+Uberaba,33.5,0.37,17400,Leste
+Boa Vista,30.7,0.46,15500,Norte
+Jardim das Américas,31.0,0.43,16200,Leste
+Campina do Siqueira,33.3,0.39,16800,Oeste
+Alto Boqueirão,36.0,0.26,20500,Sul
+Rebouças,32.0,0.4,15800,Centro
+Cristo Rei,31.8,0.41,15200,Leste
+Vila Izabel,30.9,0.44,15900,Centro
+Prado Velho,33.7,0.36,16700,Centro
+Portão,34.8,0.33,18600,Sul
+Fanny,32.1,0.42,14400,Sul
+Guabirotuba,30.4,0.49,13500,Leste
+Ahú,31.6,0.45,13900,Norte
+Tatuquara,36.2,0.24,22500,Sul
+Campo Comprido,34.1,0.34,17800,Oeste
+CIC,35.9,0.28,19300,Sul
+Lamenha Pequena,29.8,0.5,11000,Noroeste

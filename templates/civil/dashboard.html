@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Voluntário{% endblock %}
+{% block title %}Dashboard - Civil{% endblock %}
 
 {% block main_class %}container-fluid p-0{% endblock %}
 
 {% block content %}
 <div class="row g-0">
     <!-- Sidebar -->
-    <div class="col-md-3 sidebar-voluntario">
+    <div class="col-md-3 sidebar-civil">
         <div class="sidebar-content">
             <div class="profile-header mb-4">
                 <h2 class="text-center mb-2">
-                    <i class="fas fa-seedling"></i>
-                    Voluntário
+                    <i class="fas fa-users"></i>
+                    Civil
                 </h2>
                 <div class="profile-badge">
                     <i class="fas fa-heart"></i>
@@ -23,7 +23,7 @@
             <!-- Estatísticas Simplificadas -->
             <div class="info-card mb-4">
                 <h5><i class="fas fa-chart-pie"></i> Resumo</h5>
-                <div id="volunteer-stats">
+                <div id="civil-stats">
                     <div class="stat-item">
                         <span class="stat-label">Zonas que Precisam de Ajuda:</span>
                         <span class="stat-value" id="needs-help">-</span>
@@ -58,19 +58,19 @@
                 <div class="contact-info">
                     <p><i class="fas fa-envelope"></i> voluntarios@cidadesfrias.com.br</p>
                     <p><i class="fas fa-phone"></i> (11) 99999-9999</p>
-                    <p><i class="fas fa-globe"></i> cidadesfrias.com.br/voluntarios</p>
+                    <p><i class="fas fa-globe"></i> cidadesfrias.com.br/civis</p>
                 </div>
                 <div class="mt-3">
-                    <button class="btn btn-success w-100" onclick="showVolunteerInfo()">
+                    <button class="btn btn-success w-100" onclick="showCivilInfo()">
                         <i class="fas fa-info-circle"></i> Saiba Mais
                     </button>
                 </div>
             </div>
             
             <!-- Detalhes da Zona Selecionada -->
-            <div class="info-card mt-4" id="volunteer-zone-details" style="display: none;">
+            <div class="info-card mt-4" id="civil-zone-details" style="display: none;">
                 <h5><i class="fas fa-info-circle"></i> Como Posso Ajudar?</h5>
-                <div id="volunteer-zone-content">
+                <div id="civil-zone-content">
                     <!-- Conteúdo será preenchido via JavaScript -->
                 </div>
             </div>
@@ -91,21 +91,21 @@
     </div>
 </div>
 
-<!-- Modal Simplificado para Voluntário -->
-<div class="modal fade" id="voluntarioModal" tabindex="-1">
+<!-- Modal Simplificado para Civil -->
+<div class="modal fade" id="civilModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="voluntarioModalTitle">
-                    <i class="fas fa-seedling"></i> Como Posso Ajudar?
+                <h5 class="modal-title" id="civilModalTitle">
+                    <i class="fas fa-users"></i> Como Posso Ajudar?
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="voluntarioModalBody">
+            <div class="modal-body" id="civilModalBody">
                 <!-- Conteúdo será preenchido via JavaScript -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="contactVolunteer()">
+                <button type="button" class="btn btn-success" onclick="contactCivil()">
                     <i class="fas fa-phone"></i> Quero Ajudar Aqui!
                 </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -119,7 +119,7 @@
 
 {% block extra_css %}
 <style>
-.sidebar-voluntario {
+.sidebar-civil {
     background: linear-gradient(135deg, #A23B72 0%, #F18F01 100%);
     color: white;
     min-height: 100vh;

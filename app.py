@@ -67,8 +67,8 @@ class HeatIslandAnalyzer:
             'acao_sugerida': suggestions.get('action', 'Ação não definida'),
             'custo_estimado': suggestions.get('cost_range', 'Custo não estimado'),
             'especies_recomendadas': suggestions.get('species', 'Espécies não definidas'),
-            'volunteer_message': suggestions.get('volunteer_message', ''),
-            'volunteer_description': suggestions.get('volunteer_description', '')
+            'civil_message': suggestions.get('civil_message', ''),
+            'civil_description': suggestions.get('civil_description', '')
         }
     
     def generate_report_data(self):
@@ -99,8 +99,8 @@ def index():
     
     if session['user_profile'] == 'gestor':
         return render_template('gestor/dashboard.html')
-    elif session['user_profile'] == 'voluntario':
-        return render_template('voluntario/dashboard.html')
+    elif session['user_profile'] == 'civil':
+        return render_template('civil/dashboard.html')
     else:
         return redirect(url_for('login'))
 
@@ -115,7 +115,7 @@ def auth_login():
     data = request.get_json()
     profile = data.get('profile')
     
-    if profile in ['gestor', 'voluntario']:
+    if profile in ['gestor', 'civil']:
         # Simula login - em produção seria autenticação real
         session['user_profile'] = profile
         session['user_name'] = Config.USER_PROFILES[profile.upper()]['name']
@@ -138,26 +138,57 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+@app.route('/relatorios')
+def relatorios():
+    """
+    Página de relatórios interativos
+    """
+    # Verifica se o usuário está logado
+    if 'user_profile' not in session:
+        return redirect(url_for('login'))
+    
+    # Apenas gestores podem acessar relatórios detalhados
+    if session['user_profile'] != 'gestor':
+        return redirect(url_for('index'))
+    
+    return render_template('relatorios.html')
+
 @app.route('/api/zones')
 def get_zones():
     """Retorna dados de todas as zonas para o mapa"""
-    zones_data = []
-    for _, row in analyzer.data.iterrows():
-        zones_data.append({
-            'id': row['id'],
-            'nome': row['nome'],
-            'regiao': row.get('regiao', 'São Paulo'),  # Adiciona região se disponível
-            'latitude': row['latitude'],
-            'longitude': row['longitude'],
-            'temperatura': row['temperatura'],
-            'ndvi': row['ndvi'],
-            'densidade_populacional': row['densidade_populacional'],
-            'indice_criticidade': round(row['indice_criticidade'], 2),
-            'classificacao': row['classificacao'],
-            'cor': row['cor']
-        })
+    # Verifica se foi especificada uma cidade
+    city = request.args.get('city', 'sao_paulo')
     
-    return jsonify(zones_data)
+    # Valida cidade
+    if city not in Config.CITIES:
+        return jsonify({'error': 'Cidade não encontrada'}), 404
+    
+    try:
+        # Carrega dados da cidade especificada
+        city_config = Config.CITIES[city]
+        city_analyzer = HeatIslandAnalyzer(city_config['csv_file'])
+        
+        zones_data = []
+        for _, row in city_analyzer.data.iterrows():
+            zones_data.append({
+                'id': row['id'],
+                'nome': row['nome'],
+                'regiao': row.get('regiao', city_config['name']),
+                'latitude': row['latitude'],
+                'longitude': row['longitude'],
+                'temperatura': row['temperatura'],
+                'ndvi': row['ndvi'],
+                'densidade_populacional': row['densidade_populacional'],
+                'indice_criticidade': round(row['indice_criticidade'], 2),
+                'classificacao': row['classificacao'],
+                'cor': row['cor']
+            })
+        
+        return jsonify(zones_data)
+        
+    except Exception as e:
+        logger.error(f"Erro ao carregar dados da cidade {city}: {e}")
+        return jsonify({'error': 'Erro ao carregar dados da cidade'}), 500
 
 @app.route('/api/zone/<int:zone_id>')
 def get_zone(zone_id):

@@ -24,8 +24,8 @@
     font-weight: 500;
 }
 
-/* Perfil Voluntário */
-.sidebar-voluntario {
+/* Perfil Civil */
+.sidebar-civil {
     background: linear-gradient(135deg, #A23B72 0%, #F18F01 100%);
     color: white;
     min-height: 100vh;
@@ -42,16 +42,16 @@
     border-bottom-color: #2E86AB;
 }
 
-.voluntario-popup {
+.civil-popup {
     min-width: 200px;
 }
 
-.voluntario-popup .popup-title {
+.civil-popup .popup-title {
     color: #A23B72;
     border-bottom-color: #A23B72;
 }
 
-/* Status específicos para voluntários */
+/* Status específicos para civis */
 .zone-status {
     padding: 1rem;
     border-radius: 10px;
@@ -74,7 +74,7 @@
     color: #2c3e50;
 }
 
-/* Informações de contato para voluntários */
+/* Informações de contato para civis */
 .contact-info p {
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
@@ -83,11 +83,11 @@
     gap: 0.5rem;
 }
 
-.volunteer-zone-info {
+.civil-zone-info {
     font-size: 0.9rem;
 }
 
-.volunteer-zone-info p {
+.civil-zone-info p {
     margin-bottom: 0.5rem;
 }
 
@@ -151,7 +151,7 @@
 /* Responsivo específico por perfil */
 @media (max-width: 768px) {
     .sidebar-gestor,
-    .sidebar-voluntario {
+    .sidebar-civil {
         min-height: auto;
         height: auto;
     }
@@ -166,7 +166,7 @@
     }
     
     .gestor-popup,
-    .voluntario-popup {
+    .civil-popup {
         min-width: 200px;
     }
 }

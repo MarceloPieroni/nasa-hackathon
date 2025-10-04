@@ -72,13 +72,16 @@
             <div class="info-card">
                 <h5><i class="fas fa-tools"></i> Ações Rápidas</h5>
                 <div class="d-grid gap-2">
-                    <button class="btn btn-primary" onclick="generateFullReport()">
-                        <i class="fas fa-file-pdf"></i> Relatório Completo
+                    <a href="{{ url_for('relatorios') }}" class="btn btn-primary">
+                        <i class="fas fa-chart-line"></i> Ver Relatórios
+                    </a>
+                    <button class="btn btn-outline-primary" onclick="generateFullReport()">
+                        <i class="fas fa-file-pdf"></i> Relatório PDF
                     </button>
-                    <button class="btn btn-outline-primary" onclick="exportData()">
+                    <button class="btn btn-outline-secondary" onclick="exportData()">
                         <i class="fas fa-download"></i> Exportar Dados
                     </button>
-                    <button class="btn btn-outline-secondary" onclick="filterCritical()">
+                    <button class="btn btn-outline-info" onclick="filterCritical()">
                         <i class="fas fa-filter"></i> Filtrar Críticas
                     </button>
                 </div>

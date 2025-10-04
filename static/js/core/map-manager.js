@@ -109,7 +109,7 @@ class MapManager {
         if (this.currentProfile === 'gestor') {
             return this.createGestorPopup(zone);
         } else {
-            return this.createVoluntarioPopup(zone);
+            return this.createCivilPopup(zone);
         }
     }
 
@@ -152,15 +152,15 @@ class MapManager {
     }
 
     /**
-     * Popup simplificado para voluntários
+     * Popup simplificado para civis
      */
-    createVoluntarioPopup(zone) {
+    createCivilPopup(zone) {
         const needsHelp = zone.classificacao !== 'Segura';
         const helpIcon = needsHelp ? '🌳' : '✅';
         const helpText = needsHelp ? 'Precisa de Ajuda' : 'Bem Cuidada';
 
         return `
-            <div class="popup-content voluntario-popup">
+            <div class="popup-content civil-popup">
                 <div class="popup-title">
                     ${helpIcon} ${zone.nome}
                 </div>
@@ -187,7 +187,7 @@ class MapManager {
         if (this.currentProfile === 'gestor') {
             this.showGestorModal(zone);
         } else {
-            this.showVoluntarioModal(zone);
+            this.showCivilModal(zone);
         }
     }
 
@@ -202,12 +202,12 @@ class MapManager {
     }
 
     /**
-     * Mostra modal simplificado para voluntários
+     * Mostra modal simplificado para civis
      */
-    showVoluntarioModal(zone) {
-        // Implementação será feita no arquivo voluntario.js
-        if (window.VoluntarioManager) {
-            window.VoluntarioManager.showZoneDetails(zone);
+    showCivilModal(zone) {
+        // Implementação será feita no arquivo civil.js
+        if (window.CivilManager) {
+            window.CivilManager.showZoneDetails(zone);
         }
     }
 

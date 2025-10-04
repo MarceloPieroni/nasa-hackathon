@@ -1,16 +1,16 @@
 /**
- * Voluntario Manager - Gerenciador para Perfil de Voluntário
+ * Civil Manager - Gerenciador para Perfil de Civil
  * Sistema Cidades Frias, Corações Quentes
  */
 
-class VoluntarioManager {
+class CivilManager {
     constructor() {
         this.currentZone = null;
         this.initialized = false;
     }
 
     /**
-     * Inicializa o gerenciador de voluntário
+     * Inicializa o gerenciador de civil
      */
     async init() {
         if (this.initialized) return;
@@ -20,7 +20,7 @@ class VoluntarioManager {
             const zonesData = await window.DataManager.loadZonesData();
             
             // Atualiza estatísticas na interface
-            this.updateVolunteerStatistics();
+            this.updateCivilStatistics();
             
             // Adiciona zonas ao mapa
             window.MapManager.addZonesToMap(zonesData);
@@ -29,18 +29,18 @@ class VoluntarioManager {
             this.hideLoading();
             
             this.initialized = true;
-            console.log('VoluntarioManager inicializado com sucesso');
+            console.log('CivilManager inicializado com sucesso');
             
         } catch (error) {
-            console.error('Erro ao inicializar VoluntarioManager:', error);
+            console.error('Erro ao inicializar CivilManager:', error);
             this.showError('Erro ao carregar dados do sistema');
         }
     }
 
     /**
-     * Atualiza estatísticas simplificadas para voluntários
+     * Atualiza estatísticas simplificadas para civis
      */
-    updateVolunteerStatistics() {
+    updateCivilStatistics() {
         const stats = window.DataManager.getStatistics();
         
         // Calcula zonas que precisam de ajuda (críticas + médias)
@@ -62,19 +62,19 @@ class VoluntarioManager {
             const zoneDetails = await window.DataManager.loadZoneDetails(zone.id);
             
             // Atualiza título do modal
-            document.getElementById('voluntarioModalTitle').innerHTML = `
-                <i class="fas fa-seedling"></i> ${zoneDetails.nome}
+            document.getElementById('civilModalTitle').innerHTML = `
+                <i class="fas fa-users"></i> ${zoneDetails.nome}
             `;
             
             // Preenche conteúdo do modal
-            this.fillVolunteerModalContent(zoneDetails);
+            this.fillCivilModalContent(zoneDetails);
             
             // Mostra modal
-            const modal = new bootstrap.Modal(document.getElementById('voluntarioModal'));
+            const modal = new bootstrap.Modal(document.getElementById('civilModal'));
             modal.show();
             
             // Atualiza sidebar
-            this.updateVolunteerSidebar(zoneDetails);
+            this.updateCivilSidebar(zoneDetails);
             
         } catch (error) {
             console.error('Erro ao carregar detalhes da zona:', error);
@@ -83,10 +83,10 @@ class VoluntarioManager {
     }
 
     /**
-     * Preenche conteúdo do modal para voluntários
+     * Preenche conteúdo do modal para civis
      */
-    fillVolunteerModalContent(zoneDetails) {
-        const modalBody = document.getElementById('voluntarioModalBody');
+    fillCivilModalContent(zoneDetails) {
+        const modalBody = document.getElementById('civilModalBody');
         
         const needsHelp = zoneDetails.classificacao !== 'Segura';
         const helpIcon = needsHelp ? '🌳' : '✅';
@@ -119,7 +119,7 @@ class VoluntarioManager {
                 <div class="col-md-6">
                     <h6><i class="fas fa-hands-helping"></i> Como Ajudar</h6>
                     <div class="help-info">
-                        <p>${zoneDetails.volunteer_description}</p>
+                        <p>${zoneDetails.civil_description}</p>
                         ${needsHelp ? `
                             <div class="alert alert-warning">
                                 <strong>Esta zona precisa de ajuda!</strong><br>
@@ -145,11 +145,11 @@ class VoluntarioManager {
     }
 
     /**
-     * Atualiza sidebar do voluntário
+     * Atualiza sidebar do civil
      */
-    updateVolunteerSidebar(zoneDetails) {
-        const detailsCard = document.getElementById('volunteer-zone-details');
-        const detailsContent = document.getElementById('volunteer-zone-content');
+    updateCivilSidebar(zoneDetails) {
+        const detailsCard = document.getElementById('civil-zone-details');
+        const detailsContent = document.getElementById('civil-zone-content');
         
         const needsHelp = zoneDetails.classificacao !== 'Segura';
         
@@ -161,10 +161,10 @@ class VoluntarioManager {
                         ${needsHelp ? 'Precisa de Ajuda' : 'Bem Cuidada'}
                     </span>
                 </p>
-                <p>${zoneDetails.volunteer_description}</p>
+                <p>${zoneDetails.civil_description}</p>
                 ${needsHelp ? `
                     <div class="mt-3">
-                        <button class="btn btn-success btn-sm w-100" onclick="contactVolunteer()">
+                        <button class="btn btn-success btn-sm w-100" onclick="contactCivil()">
                             <i class="fas fa-phone"></i> Quero Ajudar!
                         </button>
                     </div>
@@ -176,10 +176,10 @@ class VoluntarioManager {
     }
 
     /**
-     * Mostra informações para voluntários
+     * Mostra informações para civis
      */
-    showVolunteerInfo() {
-        const modal = new bootstrap.Modal(document.getElementById('volunteerInfoModal'));
+    showCivilInfo() {
+        const modal = new bootstrap.Modal(document.getElementById('civilInfoModal'));
         modal.show();
     }
 
@@ -201,36 +201,36 @@ class VoluntarioManager {
     }
 }
 
-// Instância global do VoluntarioManager
-window.VoluntarioManager = new VoluntarioManager();
+// Instância global do CivilManager
+window.CivilManager = new CivilManager();
 
 // Inicializa quando a página carrega
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.userProfile === 'voluntario') {
-        window.VoluntarioManager.init();
+    if (window.userProfile === 'civil') {
+        window.CivilManager.init();
     }
 });
 
 // Funções globais para botões
-function contactVolunteer() {
+function contactCivil() {
     const contactInfo = {
-        email: 'voluntarios@cidadesfrias.com.br',
+        email: 'civis@cidadesfrias.com.br',
         phone: '(11) 99999-9999',
-        website: 'https://cidadesfrias.com.br/voluntarios'
+        website: 'https://cidadesfrias.com.br/civis'
     };
     
-    const message = `Olá! Gostaria de ajudar na arborização da zona: ${window.VoluntarioManager.currentZone?.nome || 'zona selecionada'}`;
+    const message = `Olá! Gostaria de ajudar na arborização da zona: ${window.CivilManager.currentZone?.nome || 'zona selecionada'}`;
     
     // Simula contato - em produção seria integração real
-    alert(`Contato para voluntários:\n\nEmail: ${contactInfo.email}\nTelefone: ${contactInfo.phone}\n\nMensagem: ${message}`);
+    alert(`Contato para civis:\n\nEmail: ${contactInfo.email}\nTelefone: ${contactInfo.phone}\n\nMensagem: ${message}`);
     
     // Fecha modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('voluntarioModal'));
+    const modal = bootstrap.Modal.getInstance(document.getElementById('civilModal'));
     if (modal) {
         modal.hide();
     }
 }
 
-function showVolunteerInfo() {
-    alert('Informações para Voluntários:\n\n• Você pode ajudar plantando árvores\n• Participar de mutirões de arborização\n• Cuidar de áreas verdes existentes\n• Divulgar a importância da arborização urbana\n\nEntre em contato conosco para saber como participar!');
+function showCivilInfo() {
+    alert('Informações para Civis:\n\n• Você pode ajudar plantando árvores\n• Participar de mutirões de arborização\n• Cuidar de áreas verdes existentes\n• Divulgar a importância da arborização urbana\n\nEntre em contato conosco para saber como participar!');
 }

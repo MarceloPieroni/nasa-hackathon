@@ -1,0 +1,411 @@
+/* Dashboard CSS - Sistema Clima Vida */
+
+/* ============================================================================
+   LAYOUT E ESTRUTURA
+   ============================================================================ */
+
+.container-fluid {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+}
+
+/* ============================================================================
+   HEADER DA PÁGINA
+   ============================================================================ */
+
+.city-selector {
+    min-width: 150px;
+}
+
+.city-selector .form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.city-selector .form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.city-selector .form-select:focus {
+    border-color: #2E86AB;
+    box-shadow: 0 0 0 0.2rem rgba(46, 134, 171, 0.25);
+}
+
+.reports-header {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.reports-header h1 {
+    color: #2E86AB;
+    font-weight: 700;
+}
+
+.reports-header .lead {
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+/* ============================================================================
+   CARDS DE ESTATÍSTICAS
+   ============================================================================ */
+
+.stats-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.stats-icon {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.stats-card:hover .stats-icon {
+    opacity: 1;
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================================================
+   CARDS DE GRÁFICOS
+   ============================================================================ */
+
+.chart-card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12) !important;
+}
+
+.chart-card .card-header {
+    padding: 1.5rem 1.5rem 0 1.5rem;
+}
+
+.chart-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.chart-card .card-body {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+}
+
+/* ============================================================================
+   CONTAINERS DE GRÁFICOS
+   ============================================================================ */
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 1rem;
+}
+
+.chart-container canvas {
+    max-height: 100%;
+}
+
+/* ============================================================================
+   EXPLICAÇÕES DOS GRÁFICOS
+   ============================================================================ */
+
+.chart-explanation {
+    font-size: 0.9rem;
+}
+
+.chart-explanation .alert {
+    border-radius: 8px;
+    border: none;
+    padding: 0.75rem 1rem;
+}
+
+.chart-explanation .alert i {
+    opacity: 0.8;
+}
+
+/* ============================================================================
+   TABELA DE DADOS
+   ============================================================================ */
+
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: none;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+}
+
+.table tbody td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-color: #e9ecef;
+}
+
+/* ============================================================================
+   BADGES DE STATUS
+   ============================================================================ */
+
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.critical {
+    background: linear-gradient(135deg, #FF4444 0%, #FF6B6B 100%);
+    color: white;
+}
+
+.status-badge.medium {
+    background: linear-gradient(135deg, #FFA500 0%, #FFB84D 100%);
+    color: white;
+}
+
+.status-badge.safe {
+    background: linear-gradient(135deg, #44FF44 0%, #66FF66 100%);
+    color: #2c3e50;
+}
+
+/* ============================================================================
+   RODAPÉ
+   ============================================================================ */
+
+.reports-footer {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    margin-top: 2rem;
+}
+
+/* ============================================================================
+   LOADING SPINNER
+   ============================================================================ */
+
+#loading-spinner {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#loading-spinner .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3em;
+}
+
+/* ============================================================================
+   BOTÕES E CONTROLES
+   ============================================================================ */
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2E86AB 0%, #A23B72 100%);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1f5f7a 0%, #7d2a56 100%);
+}
+
+.btn-outline-primary {
+    border: 2px solid #2E86AB;
+    color: #2E86AB;
+}
+
+.btn-outline-primary:hover {
+    background: #2E86AB;
+    border-color: #2E86AB;
+}
+
+/* ============================================================================
+   SELECT MULTIPLE
+   ============================================================================ */
+
+.form-select {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    border-color: #2E86AB;
+    box-shadow: 0 0 0 0.2rem rgba(46, 134, 171, 0.25);
+}
+
+/* ============================================================================
+   RESPONSIVIDADE
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+    
+    .reports-header {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .reports-header .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .reports-footer .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    .reports-header {
+        padding: 1rem;
+    }
+    
+    .stats-card .card-body {
+        padding: 1rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+    
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================================================
+   ANIMAÇÕES
+   ============================================================================ */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stats-card,
+.chart-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.stats-card:nth-child(1) { animation-delay: 0.1s; }
+.stats-card:nth-child(2) { animation-delay: 0.2s; }
+.stats-card:nth-child(3) { animation-delay: 0.3s; }
+.stats-card:nth-child(4) { animation-delay: 0.4s; }
+
+.chart-card:nth-child(1) { animation-delay: 0.5s; }
+.chart-card:nth-child(2) { animation-delay: 0.6s; }
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+    .container-fluid {
+        background: white !important;
+        padding: 0;
+    }
+    
+    .reports-header,
+    .reports-footer {
+        box-shadow: none !important;
+        background: white !important;
+    }
+    
+    .btn {
+        display: none !important;
+    }
+    
+    .chart-container {
+        height: 200px !important;
+    }
+    
+    .table {
+        box-shadow: none !important;
+    }
+}

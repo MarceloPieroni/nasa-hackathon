@@ -104,8 +104,8 @@
     <!-- Profile-specific JavaScript -->
     {% if session.user_profile == 'gestor' %}
         <script src="{{ url_for('static', filename='js/profiles/gestor.js') }}"></script>
-    {% elif session.user_profile == 'voluntario' %}
-        <script src="{{ url_for('static', filename='js/profiles/voluntario.js') }}"></script>
+    {% elif session.user_profile == 'civil' %}
+        <script src="{{ url_for('static', filename='js/profiles/civil.js') }}"></script>
     {% endif %}
     
     <!-- App Initialization -->

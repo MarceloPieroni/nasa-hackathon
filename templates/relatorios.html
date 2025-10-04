@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - Clima Vida{% endblock %}
+
+{% block main_class %}container-fluid{% endblock %}
+
+{% block content %}
+<!-- Header da Página -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="reports-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 fw-bold text-primary mb-2">
+                        <i class="fas fa-chart-line me-3"></i>
+                        Painel de Relatórios
+                    </h1>
+                    <p class="lead text-muted mb-0">
+                        Análise interativa das zonas urbanas - Sistema Clima Vida
+                    </p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Seletor de Cidade -->
+                    <div class="city-selector">
+                        <label for="citySelect" class="form-label mb-1">Cidade:</label>
+                        <select id="citySelect" class="form-select">
+                            <option value="sao_paulo">São Paulo</option>
+                            <option value="curitiba">Curitiba</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-map me-2"></i>
+                        Voltar ao Mapa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div id="loading-spinner" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Carregando dados...</span>
+    </div>
+    <p class="mt-3 text-muted">Carregando dados das zonas urbanas...</p>
+</div>
+
+<!-- Conteúdo Principal (oculto inicialmente) -->
+<div id="main-content" style="display: none;">
+
+    <!-- Cards de Destaque -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="stats-icon mb-3">
+                        <i class="fas fa-map-marked-alt fa-2x text-primary"></i>
+                    </div>
+                    <h3 class="stats-number text-primary mb-1" id="total-zones">-</h3>
+                    <p class="stats-label text-muted mb-0">Zonas Mapeadas</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="stats-icon mb-3">
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                    </div>
+                    <h3 class="stats-number text-danger mb-1" id="critical-zones">-</h3>
+                    <p class="stats-label text-muted mb-0">Zonas Críticas</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="stats-icon mb-3">
+                        <i class="fas fa-thermometer-half fa-2x text-warning"></i>
+                    </div>
+                    <h3 class="stats-number text-warning mb-1" id="avg-temperature">-</h3>
+                    <p class="stats-label text-muted mb-0">Temp. Média (°C)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stats-card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="stats-icon mb-3">
+                        <i class="fas fa-leaf fa-2x text-success"></i>
+                    </div>
+                    <h3 class="stats-number text-success mb-1" id="avg-ndvi">-</h3>
+                    <p class="stats-label text-muted mb-0">NDVI Médio</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos Interativos -->
+    <div class="row">
+        <!-- Gráfico Pizza - Distribuição por Criticidade -->
+        <div class="col-lg-6 mb-4">
+            <div class="card chart-card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2 text-primary"></i>
+                        Distribuição por Criticidade
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="criticityChart"></canvas>
+                    </div>
+                    <div class="chart-explanation mt-3">
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Interpretação:</strong> Zonas críticas (vermelho) requerem intervenção imediata, 
+                            zonas médias (laranja) precisam de atenção, e zonas seguras (verde) estão bem preservadas.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Barras - Temperatura por Zona -->
+        <div class="col-lg-6 mb-4">
+            <div class="card chart-card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-thermometer-half me-2 text-warning"></i>
+                        Temperatura por Zona
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
+                    <div class="chart-explanation mt-3">
+                        <div class="alert alert-warning mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Criticidade:</strong> Temperaturas acima de 40°C são consideradas críticas para 
+                            a formação de ilhas de calor urbano.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Gráfico de Barras Horizontais - NDVI por Zona -->
+        <div class="col-lg-6 mb-4">
+            <div class="card chart-card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-leaf me-2 text-success"></i>
+                        NDVI por Zona
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="ndviChart"></canvas>
+                    </div>
+                    <div class="chart-explanation mt-3">
+                        <div class="alert alert-success mb-0">
+                            <i class="fas fa-leaf me-2"></i>
+                            <strong>NDVI:</strong> Índice de vegetação (0-1). Valores próximos a 1 indicam 
+                            vegetação densa, valores próximos a 0 indicam áreas urbanizadas.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico Radar - Comparação de Zonas -->
+        <div class="col-lg-6 mb-4">
+            <div class="card chart-card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-radar me-2 text-info"></i>
+                        Comparação de Zonas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="zoneSelector" class="form-label">Selecione até 3 zonas para comparar:</label>
+                        <select id="zoneSelector" class="form-select" multiple>
+                            <!-- Opções serão preenchidas via JavaScript -->
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                    <div class="chart-explanation mt-3">
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-chart-area me-2"></i>
+                            <strong>Comparação:</strong> Visualize até 3 zonas simultaneamente para 
+                            identificar padrões e diferenças entre as áreas urbanas.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Dados Detalhados -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pb-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-table me-2 text-secondary"></i>
+                        Dados Detalhados das Zonas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="zonesTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Zona</th>
+                                    <th>Região</th>
+                                    <th>Temperatura (°C)</th>
+                                    <th>NDVI</th>
+                                    <th>Densidade (hab/km²)</th>
+                                    <th>Criticidade</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão preenchidos via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rodapé -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="reports-footer text-center py-4">
+            <div class="d-flex justify-content-center gap-4 mb-3">
+                <a href="/api/report" class="btn btn-primary btn-lg" id="downloadReport">
+                    <i class="fas fa-download me-2"></i>
+                    Baixar Relatório PDF
+                </a>
+                <button class="btn btn-outline-secondary btn-lg" onclick="window.print()">
+                    <i class="fas fa-print me-2"></i>
+                    Imprimir Relatório
+                </button>
+            </div>
+            <p class="text-muted mb-0">
+                <i class="fas fa-leaf me-2"></i>
+                Sistema Clima Vida - NASA Space Apps Hackathon 2025
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
