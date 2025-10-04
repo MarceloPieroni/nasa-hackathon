@@ -42,7 +42,7 @@
                     </li>
                     {% if session.user_profile == 'gestor' %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('reports') }}">
+                        <a class="nav-link" href="{{ url_for('generate_report') }}">
                             <i class="fas fa-file-pdf"></i> Relatórios
                         </a>
                     </li>
@@ -107,6 +107,9 @@
     {% elif session.user_profile == 'voluntario' %}
         <script src="{{ url_for('static', filename='js/profiles/voluntario.js') }}"></script>
     {% endif %}
+    
+    <!-- App Initialization -->
+    <script src="{{ url_for('static', filename='js/app-init.js') }}"></script>
     
     {% block extra_js %}{% endblock %}
 </body>
